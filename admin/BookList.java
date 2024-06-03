@@ -9,7 +9,8 @@ public class BookList extends JFrame {
   public BookList() {
     setTitle("Book List");
     setSize(1280, 768);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    setLocationRelativeTo(null);
     // setLayout(new BorderLayout());
 
     getContentPane().setBackground(Colors.BASE);

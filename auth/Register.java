@@ -22,8 +22,9 @@ public class Register extends JFrame {
     SwingUtilities.invokeLater(() -> {
       setTitle("Register Form");
       setSize(1280, 768);
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       setLayout(new GridLayout(1, 2));
+      setLocationRelativeTo(null);
 
       JPanel registrationPanel = new JPanel();
       registrationPanel.setBackground(Colors.BASE);
@@ -121,7 +122,7 @@ public class Register extends JFrame {
             if (isRegistered) {
               JOptionPane.showMessageDialog(Register.this, "Register successful");
 
-              Register.this.dispose();
+              dispose();
 
               new Login(conn);
             } else {

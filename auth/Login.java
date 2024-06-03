@@ -24,8 +24,9 @@ public class Login extends JFrame {
     SwingUtilities.invokeLater(() -> {
       setTitle("Login Form");
       setSize(1280, 768);
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       setLayout(new GridLayout(1, 2));
+      setLocationRelativeTo(null);
 
       // Left panel for the login form
       JPanel loginPanel = new JPanel();
@@ -119,7 +120,7 @@ public class Login extends JFrame {
       registerButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          Login.this.dispose(); // Close the login window
+          dispose(); 
           new Register(conn);
         }
       });
