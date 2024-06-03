@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_name VARCHAR(255) NOT NULL,
   suffix_name VARCHAR(255), -- e.g. Jr., III., etc.
   role ENUM('student', 'teacher', 'admin') NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
   password TEXT NOT NULL,
   avatar_url TEXT
 );
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS departments (
 );
 
 CREATE TABLE IF NOT EXISTS teachers (
-  id VARCHAR(100) PRIMARY KEY, -- Use something similar to a student no.
+  id VARCHAR(100) PRIMARY KEY, -- Use employee ID (something similar to a student no.)
 
   department_id VARCHAR(50) NOT NULL,
   user_id CHAR(36) NOT NULL,

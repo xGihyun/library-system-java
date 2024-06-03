@@ -1,13 +1,15 @@
 package database;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class Database {
-  Connection conn;
-  String username;
-  String password;
-  String dbName;
-  String url;
+  private Connection conn;
+  private String username;
+  private String password;
+  private String dbName;
+  private String url;
 
   public Database(String db, String username, String password, String dbName) throws Exception {
     try {
@@ -26,4 +28,7 @@ public class Database {
     }
   }
 
+  public Connection getConnection() {
+    return this.conn;
+  }
 }
