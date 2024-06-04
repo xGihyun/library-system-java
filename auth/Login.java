@@ -163,7 +163,7 @@ public class Login extends JFrame {
         String avatarUrl = rs.getString("avatar_url");
         String userEmail = rs.getString("email");
 
-        User user = new User(id, firstName, middleName, lastName, suffixName, role, avatarUrl, email)
+        User user = new User(id, firstName, middleName, lastName, suffixName, role, avatarUrl, userEmail);
 
         return user;
       }
