@@ -27,7 +27,9 @@ public class Sidebar extends JPanel {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     setBackground(Colors.BASE);
     setPreferredSize(new Dimension(200, 768));
-
+    
+    addLogoButton();
+    
     // Add navigation buttons
     addButton("Book List", e -> navigateTo(BookList.class));
     addButton("Borrower List", e -> navigateTo(BorrowerList.class));
@@ -40,6 +42,24 @@ public class Sidebar extends JPanel {
     spacerPanel.setMinimumSize(new Dimension(200, Integer.MAX_VALUE));
     add(spacerPanel);
   }
+
+    
+  private void addLogoButton() {
+	  JButton logoButton = new JButton("The Archives");
+	  logoButton.setMaximumSize(new Dimension(180, 50));
+	  logoButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+	  logoButton.setFont(new Font("Arial", Font.BOLD, 28)); // Adjust font size for logo
+	  logoButton.setBackground(Colors.BASE); // Or set a custom background color
+	  logoButton.setForeground(Colors.TEXT); // Or set a custom text color
+	  logoButton.setBorder(BorderFactory.createEmptyBorder());
+	  logoButton.setEnabled(false);
+
+	  // Set insets for margin (top, left, bottom, right)
+	  logoButton.setMargin(new Insets(10, 10, 10, 10)); 
+
+	  add(logoButton);
+	  add(Box.createRigidArea(new Dimension(0, 10))); // Add space between logo and buttons
+	}
 
   private void addButton(String label, ActionListener actionListener) {
     JButton button = new JButton(label);

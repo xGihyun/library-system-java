@@ -15,7 +15,7 @@ public class Database {
     try {
       // Load the JDBC driver
       // Class.forName("org.mariadb.jdbc.Driver");
-      // Class.forName("com.mysql.cj.jdbc.Driver");
+      Class.forName("com.mysql.cj.jdbc.Driver");
 
       this.username = username;
       this.password = password;

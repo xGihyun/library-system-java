@@ -113,7 +113,7 @@ public class Login extends JFrame {
       // Create the register button with modern look
       JButton registerButton = new JButton("Register");
       registerButton.setFont(font);
-      registerButton.setBackground(Colors.GREEN);
+      registerButton.setBackground(Colors.PEACH);
       registerButton.setForeground(Colors.BASE);
       registerButton.setFocusPainted(false);
       registerButton.setBorderPainted(false);
@@ -132,13 +132,16 @@ public class Login extends JFrame {
 
       // Right panel for the image
       JPanel imagePanel = new JPanel();
-      imagePanel.setBackground(Colors.OVERLAY1);
+      imagePanel.setBackground(Colors.BASE);
+      imagePanel.setLayout(new GridBagLayout()); // Add this line to use GridBagLayout
       add(imagePanel);
 
       JLabel imageLabel = new JLabel();
-      ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/bocchi.jpg"));
+      ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/logoForLogin.png"));
       imageLabel.setIcon(imageIcon);
-      imagePanel.add(imageLabel);
+      imageLabel.setHorizontalAlignment(JLabel.CENTER); // Center the image horizontally
+      imageLabel.setVerticalAlignment(JLabel.CENTER); // Center the image vertically
+      imagePanel.add(imageLabel, new GridBagConstraints()); // Add the image label to the panel
 
       setVisible(true);
     });
