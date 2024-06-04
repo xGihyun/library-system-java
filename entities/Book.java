@@ -8,9 +8,10 @@ public class Book {
   private String authorId;
   private String imageUrl;
   private String authorFullName;
+  private String borrowerId;
   private boolean borrowed;
 
-  public Book(int id, String isbn, String title, String category, String authorId, boolean borrowed, String imageUrl, String authorFullName) {
+  public Book(int id, String isbn, String title, String category, String authorId, boolean borrowed, String imageUrl, String authorFullName, String borrowerId) {
     this.id = id;
     this.isbn = isbn;
     this.title = title;
@@ -19,6 +20,7 @@ public class Book {
     this.borrowed = borrowed;
     this.imageUrl = imageUrl;
     this.authorFullName = authorFullName;
+    this.borrowerId = borrowerId;
   }
 
   public int getId() {
@@ -51,5 +53,9 @@ public class Book {
 
   public String getAuthorFullName() {
     return authorFullName;
+  }
+
+  public String getBorrowerId() {
+    return borrowerId;
   }
 }

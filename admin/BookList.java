@@ -12,10 +12,13 @@ import java.util.List;
 public class BookList extends JFrame {
   private Connection conn;
   private List<Book> selectedBooks = new ArrayList<>();
+  private boolean canBorrow;
   private JButton borrowButton;
+  private User user;
 
   public BookList(Connection conn) {
     this.conn = conn;
+    this.user = Session.getInstance().getUser();
 
     SwingUtilities.invokeLater(this::createAndShowBookList);
   }
@@ -66,12 +69,13 @@ public class BookList extends JFrame {
     // addBookButton.setBorderPainted(false);
     // addBookButton.addActionListener(e -> openAddBookForm());
     // add(addBookButton, BorderLayout.SOUTH);
+
     // Borrow Button
     borrowButton = new JButton("Borrow Selected Books");
     borrowButton.setFont(new Font("Arial", Font.BOLD, 16));
     borrowButton.setBackground(Colors.GREEN);
     borrowButton.setForeground(Colors.BASE);
-    borrowButton.setVisible(false); // Initially hidden
+    borrowButton.setVisible(false);
     borrowButton.addActionListener(e -> borrowSelectedBooks());
     add(borrowButton, BorderLayout.SOUTH);
 
@@ -80,33 +84,37 @@ public class BookList extends JFrame {
 
   private List<Book> fetchBooksFromDatabase() {
     List<Book> books = new ArrayList<>();
-    String query = "SELECT b.id, b.isbn, b.title, b.category, b.author_id, b.image_url, a.first_name AS author_first_name, a.middle_name AS author_middle_name, a.last_name AS author_last_name, a.suffix_name AS author_suffix_name, "
+    String query = "SELECT b.id, b.isbn, b.title, b.category, b.author_id, b.image_url, a.first_name AS author_first_name, a.middle_name AS author_middle_name, a.last_name AS author_last_name, a.suffix_name AS author_suffix_name, bb.user_id AS borrower_id, "
         +
         " (SELECT returned_at IS NULL FROM book_borrows WHERE book_id = b.id AND returned_at IS NULL LIMIT 1) AS borrowed "
         +
         " FROM books b"
         +
-        " LEFT JOIN authors a ON b.author_id = a.id";
+        " LEFT JOIN authors a ON b.author_id = a.id"
+        +
+        " LEFT JOIN book_borrows bb ON bb.book_id = b.id";
 
-    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
-      ResultSet resultSet = preparedStatement.executeQuery();
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
 
-      while (resultSet.next()) {
-        int id = resultSet.getInt("id");
-        String isbn = resultSet.getString("isbn");
-        String title = resultSet.getString("title");
-        String category = resultSet.getString("category");
-        String authorId = resultSet.getString("author_id");
-        boolean borrowed = resultSet.getBoolean("borrowed");
-        String imageUrl = resultSet.getString("image_url");
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        int id = rs.getInt("id");
+        String isbn = rs.getString("isbn");
+        String title = rs.getString("title");
+        String category = rs.getString("category");
+        String authorId = rs.getString("author_id");
+        boolean borrowed = rs.getBoolean("borrowed");
+        String imageUrl = rs.getString("image_url");
+        String borrowerId = rs.getString("borrower_id");
 
         // TODO: Put the full author name on the book
-        String authorFirstName = resultSet.getString("author_first_name");
-        String authorMiddleName = resultSet.getString("author_middle_name");
-        String authorLastName = resultSet.getString("author_last_name");
-        String authorSuffixName = resultSet.getString("author_suffix_name");
+        String authorFirstName = rs.getString("author_first_name");
+        String authorMiddleName = rs.getString("author_middle_name");
+        String authorLastName = rs.getString("author_last_name");
+        String authorSuffixName = rs.getString("author_suffix_name");
 
-        books.add(new Book(id, isbn, title, category, authorId, borrowed, imageUrl, authorFirstName));
+        books.add(new Book(id, isbn, title, category, authorId, borrowed, imageUrl, authorFirstName, borrowerId));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -143,9 +151,15 @@ public class BookList extends JFrame {
     detailsPanel.add(createDetailLabel("Author: " + book.getAuthorFullName()));
 
     if (book.isBorrowed()) {
-      detailsPanel.add(createDetailLabel("Status: Borrowed", Colors.RED));
+      String label = "Status: Borrowed";
+
+      if (book.getBorrowerId().equalsIgnoreCase(user.getId())) {
+        label += " (You)";
+      }
+
+      detailsPanel.add(createDetailLabel(label, Colors.RED));
     } else {
-      detailsPanel.add(createDetailLabel("Status: Available", Colors.GREEN));
+      detailsPanel.add(createDetailLabel("Status: Returned", Colors.GREEN));
     }
 
     card.add(detailsPanel, BorderLayout.SOUTH);
@@ -159,12 +173,15 @@ public class BookList extends JFrame {
     selectCheckBox.setFocusPainted(false);
     selectCheckBox.setBorderPainted(false);
 
+    selectCheckBox.setEnabled(!book.isBorrowed());
+
     selectCheckBox.addActionListener(e -> {
       if (selectCheckBox.isSelected()) {
         selectedBooks.add(book);
       } else {
         selectedBooks.remove(book);
       }
+
       borrowButton.setVisible(!selectedBooks.isEmpty());
     });
     detailsPanel.add(selectCheckBox);
@@ -188,15 +205,15 @@ public class BookList extends JFrame {
     List<Author> authors = new ArrayList<>();
     String query = "SELECT * FROM authors";
 
-    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
-      ResultSet resultSet = preparedStatement.executeQuery();
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      ResultSet rs = stmt.executeQuery();
 
-      while (resultSet.next()) {
-        String id = resultSet.getString("id");
-        String firstName = resultSet.getString("first_name");
-        String middleName = resultSet.getString("middle_name");
-        String lastName = resultSet.getString("last_name");
-        String suffixName = resultSet.getString("suffix_name");
+      while (rs.next()) {
+        String id = rs.getString("id");
+        String firstName = rs.getString("first_name");
+        String middleName = rs.getString("middle_name");
+        String lastName = rs.getString("last_name");
+        String suffixName = rs.getString("suffix_name");
 
         authors.add(new Author(id, firstName, middleName, lastName, suffixName));
       }
@@ -209,14 +226,14 @@ public class BookList extends JFrame {
   private boolean addBookToDatabase(String isbn, String title, String category, String authorId, String imageUrl) {
     String query = "INSERT INTO books (isbn, title, category, author_id, image_url) VALUES (?, ?, ?, ?, ?)";
 
-    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
-      preparedStatement.setString(1, isbn);
-      preparedStatement.setString(2, title);
-      preparedStatement.setString(3, category);
-      preparedStatement.setString(4, authorId);
-      preparedStatement.setString(5, imageUrl);
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      stmt.setString(1, isbn);
+      stmt.setString(2, title);
+      stmt.setString(3, category);
+      stmt.setString(4, authorId);
+      stmt.setString(5, imageUrl);
 
-      return preparedStatement.executeUpdate() > 0;
+      return stmt.executeUpdate() > 0;
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -224,15 +241,23 @@ public class BookList extends JFrame {
   }
 
   private void borrowSelectedBooks() {
-    User user = Session.getInstance().getUser();
-
     if (user == null) {
       JOptionPane.showMessageDialog(this, "User not authenticated.");
       return;
     }
 
+    if (user.getRole().equalsIgnoreCase("student") && selectedBooks.size() > 2) {
+      JOptionPane.showMessageDialog(this, "Sorry! You have exceeded the number of books (2) to be borrowed.");
+      return;
+    }
+
+    if (user.getRole().equalsIgnoreCase("teacher") && selectedBooks.size() > 5) {
+      JOptionPane.showMessageDialog(this, "Sorry! You have exceeded the number of books (5) to be borrowed.");
+      return;
+    }
+
     try {
-      // TODO: Only students get 3 days due date
+      // NOTE: Only students get 3 days due date
       String query = "INSERT INTO book_borrows (due_date, book_id, user_id) VALUES (DATE_ADD(CURDATE(), INTERVAL 3 DAY), ?, ?)";
       PreparedStatement stmt = conn.prepareStatement(query);
 
@@ -244,13 +269,14 @@ public class BookList extends JFrame {
 
       stmt.executeBatch();
       JOptionPane.showMessageDialog(this, "Books borrowed successfully!");
+
       dispose();
+      new BookList(conn);
     } catch (SQLException e) {
       e.printStackTrace();
       JOptionPane.showMessageDialog(this, "Error borrowing books.");
     }
   }
-
 
   // NOTE: Not sure if we still need this, would be cool though
   private void openAddBookForm() {
