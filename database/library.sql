@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 04, 2024 at 09:36 AM
+-- Generation Time: Jun 04, 2024 at 08:51 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -40,7 +40,23 @@ CREATE TABLE `authors` (
 --
 
 INSERT INTO `authors` (`id`, `first_name`, `middle_name`, `last_name`, `suffix_name`) VALUES
-('88503003-2212-11ef-b43f-00e18ce201d5', 'Hajime', NULL, 'Isayama', NULL);
+('88503003-2212-11ef-b43f-00e18ce201d5', 'Hajime', NULL, 'Isayama', NULL),
+('e635beaa-227f-11ef-9ec9-00e18ce201d5', 'Sun', NULL, 'Tzu', NULL),
+('e635c168-227f-11ef-9ec9-00e18ce201d5', 'Anne', NULL, 'Frank', NULL),
+('e635c1bb-227f-11ef-9ec9-00e18ce201d5', 'Michelle', NULL, 'Obama', NULL),
+('e635c2aa-227f-11ef-9ec9-00e18ce201d5', 'Tara', NULL, 'Westover', NULL),
+('e635c2c8-227f-11ef-9ec9-00e18ce201d5', 'James', NULL, 'Clear', NULL),
+('e635c2e4-227f-11ef-9ec9-00e18ce201d5', 'Donald', NULL, 'Knuth', NULL),
+('e635c2fc-227f-11ef-9ec9-00e18ce201d5', 'Patrick', NULL, 'Fitzpatrick', NULL),
+('e635c319-227f-11ef-9ec9-00e18ce201d5', 'Philip', NULL, 'Kotler', NULL),
+('e635c333-227f-11ef-9ec9-00e18ce201d5', 'Kevin', 'Lane', 'Keller', NULL),
+('e635c34f-227f-11ef-9ec9-00e18ce201d5', 'Thomas', NULL, 'Cormen', NULL),
+('e635c368-227f-11ef-9ec9-00e18ce201d5', 'Gilbert', NULL, 'Strang', NULL),
+('e635c385-227f-11ef-9ec9-00e18ce201d5', 'Gabriel', 'García', 'Márquez', NULL),
+('e635c39f-227f-11ef-9ec9-00e18ce201d5', 'Madeleine', NULL, 'L\'Engle', NULL),
+('e635c481-227f-11ef-9ec9-00e18ce201d5', 'Markus', NULL, 'Zusak', NULL),
+('e635c49d-227f-11ef-9ec9-00e18ce201d5', 'Leo', NULL, 'Tolstoy', NULL),
+('e635c4b5-227f-11ef-9ec9-00e18ce201d5', 'Frank', NULL, 'Herbert', NULL);
 
 -- --------------------------------------------------------
 
@@ -54,20 +70,31 @@ CREATE TABLE `books` (
   `title` varchar(255) NOT NULL,
   `category` enum('fictional','non-fictional','academic') NOT NULL,
   `author_id` char(36) NOT NULL,
-  `image_url` text DEFAULT NULL
+  `image_url` text DEFAULT NULL,
+  `copyright` int(11) NOT NULL,
+  `publisher_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `books`
 --
 
-INSERT INTO `books` (`id`, `isbn`, `title`, `category`, `author_id`, `image_url`) VALUES
-(1, '1111111111111', 'Attack on Titan', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
-(2, '2222222222', 'Book Test', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
-(3, '3333333333333', 'Hello World', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
-(4, '4444444444444', 'Goodbye World', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
-(5, '5555555555555', 'Frieren: Beyond Journey\'s End', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
-(6, '6667877843', 'Hello World Goodbye', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL);
+INSERT INTO `books` (`id`, `isbn`, `title`, `category`, `author_id`, `image_url`, `copyright`, `publisher_id`) VALUES
+(7, '0060883287', 'One Hundred Years of Solitude', 'fictional', 'e635c385-227f-11ef-9ec9-00e18ce201d5', 'one-hundred-years-of-solitude.jpg', 1967, 1),
+(36, '0312367541', 'A Wrinkle in Time', 'fictional', 'e635c39f-227f-11ef-9ec9-00e18ce201d5', 'a-wrinkle-in-time.jpg', 1962, 2),
+(37, '0375831003', 'The Book Thief', 'fictional', 'e635c481-227f-11ef-9ec9-00e18ce201d5', 'the-book-thief.jpg', 2005, 3),
+(38, '0140447934', 'War and Peace', 'fictional', 'e635c49d-227f-11ef-9ec9-00e18ce201d5', 'war-and-peace.jpg', 1865, 4),
+(62, '0441013593', 'Dune', 'fictional', 'e635c4b5-227f-11ef-9ec9-00e18ce201d5', 'dune.jpg', 1865, 5),
+(63, '1599869772', 'The Art of War', 'non-fictional', 'e635beaa-227f-11ef-9ec9-00e18ce201d5', 'the-art-of-war.jpg', 1963, 6),
+(64, '9780141032', 'The Diary of a Young Girl', 'non-fictional', 'e635c168-227f-11ef-9ec9-00e18ce201d5', 'the-diary-of-a-young-girl.jpg', 1947, 7),
+(65, '9781524763', 'Becoming', 'non-fictional', 'e635c1bb-227f-11ef-9ec9-00e18ce201d5', 'becoming.jpg', 2018, 8),
+(66, '9780399590', 'Educated: A Memoir', 'non-fictional', 'e635c2aa-227f-11ef-9ec9-00e18ce201d5', 'educated.jpg', 2018, 9),
+(67, '9780735212', 'Atomic Habits', 'non-fictional', 'e635c2c8-227f-11ef-9ec9-00e18ce201d5', 'atomic-habits.jpg', 2018, 10),
+(68, '0201896831', 'The Art of Computer Programming', 'academic', 'e635c2e4-227f-11ef-9ec9-00e18ce201d5', 'the-art-of-computer-programming.png', 1962, 11),
+(69, '0821847916', 'Advanced Calculus', 'academic', 'e635c2fc-227f-11ef-9ec9-00e18ce201d5', 'advanced-calculus.jpg', 1988, 12),
+(70, '0132102926', 'Marketing Management', 'academic', 'e635c319-227f-11ef-9ec9-00e18ce201d5', 'marketing-management.jpg', 2009, 13),
+(71, '0262032937', 'Introduction to Algorithms', 'academic', 'e635c34f-227f-11ef-9ec9-00e18ce201d5', 'introduction-to-algorithms.jpg', 2001, 14),
+(72, '0073057920', 'Linear Algebra and Its Applications', 'academic', 'e635c368-227f-11ef-9ec9-00e18ce201d5', 'linear-algebra-and-its-applications.jpg', 1980, 15);
 
 -- --------------------------------------------------------
 
@@ -89,8 +116,8 @@ CREATE TABLE `book_borrows` (
 --
 
 INSERT INTO `book_borrows` (`id`, `borrowed_at`, `due_date`, `returned_at`, `book_id`, `user_id`) VALUES
-(1, '2024-06-04', '2024-06-07', NULL, 1, 'df228bed-21af-11ef-b516-00e18ce201d5'),
-(2, '2024-06-04', '2024-06-07', NULL, 5, 'df228bed-21af-11ef-b516-00e18ce201d5');
+(12, '2024-06-04', '2024-06-07', NULL, 7, 'df228bed-21af-11ef-b516-00e18ce201d5'),
+(13, '2024-06-04', '2024-06-07', NULL, 36, 'df228bed-21af-11ef-b516-00e18ce201d5');
 
 -- --------------------------------------------------------
 
@@ -116,6 +143,15 @@ CREATE TABLE `departments` (
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `departments`
+--
+
+INSERT INTO `departments` (`id`, `name`) VALUES
+('ccis', 'College of Computing and Information Sciences'),
+('cit', 'College of Information Technology'),
+('cs', 'College of Science');
+
 -- --------------------------------------------------------
 
 --
@@ -127,6 +163,45 @@ CREATE TABLE `penalties` (
   `amount` decimal(10,2) UNSIGNED NOT NULL,
   `user_role` enum('student','teacher') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `penalties`
+--
+
+INSERT INTO `penalties` (`id`, `amount`, `user_role`) VALUES
+(1, 20.00, 'student');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `publishers`
+--
+
+CREATE TABLE `publishers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `publishers`
+--
+
+INSERT INTO `publishers` (`id`, `name`) VALUES
+(1, 'HarperCollins Publishers'),
+(2, 'Farrar, Straus and Giroux'),
+(3, 'Random House, Inc.'),
+(4, 'Penguin Books'),
+(5, 'Ace Books'),
+(6, 'Oxford University Press'),
+(7, 'Doubleday'),
+(8, 'Crown'),
+(9, 'Random House'),
+(10, 'Avery'),
+(11, 'Addison-Wesley Professional'),
+(12, 'John Wiley & Sons, Inc.'),
+(13, 'Pearson Education, Inc.'),
+(14, 'MIT Press'),
+(15, 'Harcourt, Inc.');
 
 -- --------------------------------------------------------
 
@@ -189,8 +264,7 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id`, `section_level_id`, `user_id`) VALUES
-('a12345600', 'c1-bcsad', 'c07ac68f-21ad-11ef-b516-00e18ce201d5'),
-('a12345601', 'c1-bcsad', 'df228bed-21af-11ef-b516-00e18ce201d5');
+('a11111111', 'c1-bcsad', '79c9c30a-fc01-4f71-9f8d-5cecda72cc4d');
 
 -- --------------------------------------------------------
 
@@ -203,6 +277,13 @@ CREATE TABLE `teachers` (
   `department_id` varchar(50) NOT NULL,
   `user_id` char(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `teachers`
+--
+
+INSERT INTO `teachers` (`id`, `department_id`, `user_id`) VALUES
+('t12345', 'ccis', '7f5fa34a-c8b2-4a17-8656-99afe45d204d');
 
 -- --------------------------------------------------------
 
@@ -230,6 +311,8 @@ INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `suffix_nam
 ('02b07017-21a7-11ef-b516-00e18ce201d5', 'Aaron', NULL, 'Melendres', NULL, 'student', 'password', NULL, 'aaron@gmail.com'),
 ('1d363d3d-21a9-11ef-b516-00e18ce201d5', 'Lorena', NULL, 'Sanchez', NULL, 'student', 'password', NULL, 'lorena@gmail.com'),
 ('372ae01a-21a1-11ef-b516-00e18ce201d5', 'Admin', NULL, 'User', NULL, 'admin', 'password', NULL, 'admin@gmail.com'),
+('79c9c30a-fc01-4f71-9f8d-5cecda72cc4d', 'Eric', NULL, 'Lor', NULL, 'teacher', 'password', NULL, 'elor@gmail.com'),
+('7f5fa34a-c8b2-4a17-8656-99afe45d204d', 'Hitori', NULL, 'Bocchi', NULL, 'teacher', 'password', NULL, 'bocchi@gmail.com'),
 ('c07ac68f-21ad-11ef-b516-00e18ce201d5', 'Samantha', NULL, 'Oris', NULL, 'student', 'password', NULL, 'samantha@gmail.com'),
 ('df228bed-21af-11ef-b516-00e18ce201d5', 'Giordan', NULL, 'Nuez', NULL, 'student', 'password', NULL, 'gior@gmail.com');
 
@@ -281,7 +364,8 @@ ALTER TABLE `authors`
 ALTER TABLE `books`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `isbn` (`isbn`),
-  ADD KEY `author_id` (`author_id`);
+  ADD KEY `author_id` (`author_id`),
+  ADD KEY `publisher_id` (`publisher_id`);
 
 --
 -- Indexes for table `book_borrows`
@@ -309,6 +393,12 @@ ALTER TABLE `departments`
 -- Indexes for table `penalties`
 --
 ALTER TABLE `penalties`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `publishers`
+--
+ALTER TABLE `publishers`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -362,25 +452,31 @@ ALTER TABLE `year_levels`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT for table `book_borrows`
 --
 ALTER TABLE `book_borrows`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `book_penalties`
 --
 ALTER TABLE `book_penalties`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `penalties`
 --
 ALTER TABLE `penalties`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `publishers`
+--
+ALTER TABLE `publishers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables
@@ -390,7 +486,8 @@ ALTER TABLE `penalties`
 -- Constraints for table `books`
 --
 ALTER TABLE `books`
-  ADD CONSTRAINT `books_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `authors` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `books_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `authors` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `publisher_id` FOREIGN KEY (`publisher_id`) REFERENCES `publishers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `book_borrows`

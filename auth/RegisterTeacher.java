@@ -9,19 +9,32 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.List;
+import java.util.UUID;
 import java.util.ArrayList;
 
-public class Register extends JFrame {
+public class RegisterTeacher extends JFrame {
   private Connection conn;
-  private String selectedRole;
 
-  public Register(Connection conn, String role) {
+  public RegisterTeacher(Connection conn) {
     this.conn = conn;
-    this.selectedRole = role;
-
-    System.out.println("Register form");
-
     SwingUtilities.invokeLater(this::displayForm);
+  }
+
+  private List<Department> fetchDepartments() {
+    List<Department> departments = new ArrayList<>();
+    String query = "SELECT * FROM departments";
+
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      ResultSet rs = stmt.executeQuery();
+      while (rs.next()) {
+        String id = rs.getString("id");
+        String name = rs.getString("name");
+        departments.add(new Department(id, name));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return departments;
   }
 
   private void displayForm() {
@@ -102,6 +115,41 @@ public class Register extends JFrame {
     gbc.gridy = 3;
     registrationPanel.add(passwordText, gbc);
 
+    JLabel employeeIdLabel = new JLabel("Employee ID:");
+    employeeIdLabel.setFont(font);
+    employeeIdLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 4;
+    registrationPanel.add(employeeIdLabel, gbc);
+
+    JTextField employeeIdText = new JTextField(20);
+    employeeIdText.setFont(font);
+    employeeIdText.setBackground(Colors.MANTLE);
+    employeeIdText.setForeground(Colors.TEXT);
+    gbc.gridx = 1;
+    gbc.gridy = 4;
+    registrationPanel.add(employeeIdText, gbc);
+
+    JLabel departmentLabel = new JLabel("Department:");
+    departmentLabel.setFont(font);
+    departmentLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 5;
+    registrationPanel.add(departmentLabel, gbc);
+
+    JComboBox<Department> departmentComboBox = new JComboBox<>();
+    departmentComboBox.setFont(font);
+    departmentComboBox.setPreferredSize(new Dimension(346, 30));
+
+    List<Department> departments = fetchDepartments();
+    for (Department department : departments) {
+      departmentComboBox.addItem(department);
+    }
+
+    gbc.gridx = 1;
+    gbc.gridy = 5;
+    registrationPanel.add(departmentComboBox, gbc);
+
     JButton registerButton = new JButton("Register");
     registerButton.setFont(font);
     registerButton.setBackground(Colors.BLUE);
@@ -109,11 +157,9 @@ public class Register extends JFrame {
     registerButton.setFocusPainted(false);
     registerButton.setBorderPainted(false);
     gbc.gridx = 1;
-    gbc.gridy = 4;
-
+    gbc.gridy = 6;
     registrationPanel.add(registerButton, gbc);
 
-    // Action listener for the register button
     registerButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -121,50 +167,68 @@ public class Register extends JFrame {
         String lastName = lastNameText.getText();
         String email = emailText.getText();
         String password = new String(passwordText.getPassword());
+        String employeeId = employeeIdText.getText();
+        Department department = (Department) departmentComboBox.getSelectedItem();
 
         try {
-          boolean isRegistered = registerUser(conn, firstName, lastName, email, password);
-
-          if (isRegistered) {
-            JOptionPane.showMessageDialog(Register.this, "Register successful");
-
-            dispose();
-
-            new Login(conn);
+          String userId = registerUser(conn, firstName, lastName, email, password);
+          if (userId != null) {
+            boolean result = registerTeacher(conn, userId, employeeId, department);
+            if (result) {
+              JOptionPane.showMessageDialog(RegisterTeacher.this, "Register successful");
+              dispose();
+              new Login(conn);
+            } else {
+              JOptionPane.showMessageDialog(RegisterTeacher.this, "Register failed");
+            }
           } else {
-            JOptionPane.showMessageDialog(Register.this, "Register failed");
+            JOptionPane.showMessageDialog(RegisterTeacher.this, "Register failed");
           }
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(Register.this, "Database connection error");
+          JOptionPane.showMessageDialog(RegisterTeacher.this, "Database connection error");
         }
       }
     });
 
-    // Right panel for the image
     JPanel imagePanel = new JPanel();
     imagePanel.setBackground(Colors.OVERLAY1);
     add(imagePanel);
 
-    // Load an image (replace with an actual image path)
     JLabel imageLabel = new JLabel();
     ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/bocchi.jpg"));
     imageLabel.setIcon(imageIcon);
     imagePanel.add(imageLabel);
 
-    // Display the frame
     setVisible(true);
   }
 
-  private boolean registerUser(Connection connection, String firstName, String lastName, String email,
-      String password) {
-    String query = "INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, 'student')";
-    try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-      preparedStatement.setString(1, firstName);
-      preparedStatement.setString(2, lastName);
-      preparedStatement.setString(3, email);
-      preparedStatement.setString(4, password);
-      preparedStatement.executeUpdate();
+  private String registerUser(Connection connection, String firstName, String lastName, String email, String password) {
+    String userId = UUID.randomUUID().toString();
+    String query = "INSERT INTO users (id, first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?, 'teacher')";
+
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+      stmt.setString(1, userId);
+      stmt.setString(2, firstName);
+      stmt.setString(3, lastName);
+      stmt.setString(4, email);
+      stmt.setString(5, password);
+      stmt.executeUpdate();
+      return userId;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private boolean registerTeacher(Connection conn, String userId, String employeeId, Department department) {
+    String query = "INSERT INTO teachers (id, department_id, user_id) VALUES (?, ?, ?)";
+
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      stmt.setString(1, employeeId);
+      stmt.setString(2, department.getId());
+      stmt.setString(3, userId);
+      stmt.executeUpdate();
       return true;
     } catch (SQLException e) {
       e.printStackTrace();

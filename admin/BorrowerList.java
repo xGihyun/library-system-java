@@ -75,12 +75,14 @@ public class BorrowerList extends JFrame {
 
     String query = "SELECT stu.id AS student_id, stu.section_level_id, stu.user_id, "
         + " u.first_name, u.middle_name, u.last_name, u.suffix_name, "
-        + " sec.name AS section_name, yl.name AS year_level_name"
+        + " sec.name AS section_name, yl.name AS year_level_name, COUNT(bb.id) AS book_borrow_count"
         + " FROM students stu"
         + " JOIN users u ON u.id = stu.user_id"
         + " JOIN section_levels seclvl ON seclvl.id = stu.section_level_id"
         + " JOIN sections sec ON sec.id = seclvl.section_id"
-        + " JOIN year_levels yl ON yl.id = seclvl.year_level_id";
+        + " JOIN year_levels yl ON yl.id = seclvl.year_level_id"
+        + " JOIN book_borrows bb ON bb.user_id = stu.user_id"
+        + " GROUP BY stu.id";
 
     try (PreparedStatement stmt = conn.prepareStatement(query)) {
       ResultSet resultSet = stmt.executeQuery();
@@ -95,6 +97,7 @@ public class BorrowerList extends JFrame {
         String suffixName = resultSet.getString("suffix_name");
         String sectionName = resultSet.getString("section_name");
         String yearLevelName = resultSet.getString("year_level_name");
+        int bookBorrowCount = resultSet.getInt("book_borrow_count");
 
         students.add(new Student(studentId, sectionLevelId, userId, firstName, middleName, lastName, suffixName,
             sectionName, yearLevelName));
@@ -125,12 +128,34 @@ public class BorrowerList extends JFrame {
     panel.add(scrollPane, BorderLayout.CENTER);
   }
 
+  // TODO: Do this
+  private void displayTeachers(JPanel panel, List<Student> students) {
+    String[] columnNames = { "Name", "Employee ID", "Department" };
+    DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+    for (Student student : students) {
+
+      Object[] row = new Object[] { student.getFullName(), student.getStudentId(), student.getYearLevelName(),
+          student.getSectionName() };
+
+      model.addRow(row);
+    }
+
+    JTable table = new JTable(model);
+    styleTable(table);
+
+    JScrollPane scrollPane = new JScrollPane(table);
+    panel.add(scrollPane, BorderLayout.CENTER);
+  }
+
   private void styleTable(JTable table) {
     table.setFont(new Font("Arial", Font.PLAIN, 18));
     table.setRowHeight(30);
     table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
     table.getTableHeader().setBackground(Colors.BLUE);
     table.getTableHeader().setForeground(Colors.BASE);
+    table.setOpaque(true);
+    table.setFillsViewportHeight(true);
     table.setBackground(Colors.MANTLE);
     table.setForeground(Colors.TEXT);
     table.setSelectionBackground(Colors.OVERLAY1);

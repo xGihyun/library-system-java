@@ -1,32 +1,19 @@
 package entities;
 
 /**
- * Author
+ * Name
  */
-public class Author {
-  private String id;
+public class Name {
   private String firstName;
   private String middleName;
   private String lastName;
   private String suffixName;
-
-  public Author(String id, String firstName, String middleName, String lastName, String suffixName) {
-    this.id = id;
+  
+  public Name(String firstName, String middleName, String lastName, String suffixName) {
     this.firstName = firstName;
     this.middleName = middleName;
     this.lastName = lastName;
     this.suffixName = suffixName;
-  }
-
-  public Author(String firstName, String middleName, String lastName, String suffixName) {
-    this.firstName = firstName;
-    this.middleName = middleName;
-    this.lastName = lastName;
-    this.suffixName = suffixName;
-  }
-
-  public String getId() {
-    return id;
   }
 
   public String getFullName() {

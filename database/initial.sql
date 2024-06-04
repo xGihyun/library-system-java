@@ -157,3 +157,61 @@ CREATE TABLE IF NOT EXISTS book_penalties (
   FOREIGN KEY(penalty_id) REFERENCES penalties(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS publishers (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO `publishers`(`name`) VALUES ('HarperCollins Publishers'), 
+('Farrar, Straus and Giroux'),
+('Random House, Inc.'),
+('Penguin Books'),
+('Ace Books'),
+('Oxford University Press'),
+('Doubleday'),
+('Crown'),
+('Random House'),
+('Avery'),
+('Addison-Wesley Professional'),
+('John Wiley & Sons, Inc.'),
+('Pearson Education, Inc.'),
+('MIT Press'),
+('Harcourt, Inc.');
+
+INSERT INTO authors (first_name, middle_name, last_name, suffix_name)
+VALUES
+('Sun', NULL, 'Tzu', NULL),
+('Anne', NULL, 'Frank', NULL),
+('Michelle', NULL, 'Obama', NULL),
+('Tara', NULL, 'Westover', NULL),
+('James', NULL, 'Clear', NULL),
+('Donald', NULL, 'Knuth', NULL),
+('Patrick', NULL, 'Fitzpatrick', NULL),
+('Philip', NULL, 'Kotler', NULL),
+('Kevin', 'Lane', 'Keller', NULL),
+('Thomas', NULL, 'Cormen', NULL),
+('Gilbert', NULL, 'Strang', NULL),
+('Gabriel', 'García', 'Márquez', NULL),
+('Madeleine', NULL, "L'Engle", NULL),
+('Markus', NULL, 'Zusak', NULL),
+('Leo', NULL, 'Tolstoy', NULL),
+('Frank', NULL, 'Herbert', NULL);
+
+INSERT INTO `books`(`isbn`, `title`, `category`, `author_id`, `image_url`, `copyright`, publisher_id) 
+VALUES 
+('0312367541', 'A Wrinkle in Time', 'fictional', 'e635c39f-227f-11ef-9ec9-00e18ce201d5', 'a-wrinkle-in-time.jpg', '1962', 2),
+('0375831003', 'The Book Thief', 'fictional', 'e635c481-227f-11ef-9ec9-00e18ce201d5', 'the-book-thief.jpg', '2005', 3),
+('0140447934', 'War and Peace', 'fictional', 'e635c49d-227f-11ef-9ec9-00e18ce201d5', 'war-and-peace.jpg', '1865', 4),
+('0441013593', 'Dune', 'fictional', 'e635c4b5-227f-11ef-9ec9-00e18ce201d5', 'dune.jpg', '1865', 5),
+('1599869772', 'The Art of War', 'non-fictional', 'e635beaa-227f-11ef-9ec9-00e18ce201d5', 'the-art-of-war.jpg', '1963', 6),
+('9780141032', 'The Diary of a Young Girl', 'non-fictional', 'e635c168-227f-11ef-9ec9-00e18ce201d5', 'the-diary-of-a-young-girl.jpg', '1947', 7),
+('9781524763', 'Becoming', 'non-fictional', 'e635c1bb-227f-11ef-9ec9-00e18ce201d5', 'becoming.jpg', '2018', 8),
+('9780399590', 'Educated: A Memoir', 'non-fictional', 'e635c2aa-227f-11ef-9ec9-00e18ce201d5', 'educated.jpg', '2018', 9),
+('9780735212', 'Atomic Habits', 'non-fictional', 'e635c2c8-227f-11ef-9ec9-00e18ce201d5', 'atomic-habits.jpg', '2018', 10),
+('0201896831', 'The Art of Computer Programming', 'academic', 'e635c2e4-227f-11ef-9ec9-00e18ce201d5', 'the-art-of-computer-programming.png', '1962', 11),
+('0821847916', 'Advanced Calculus', 'academic', 'e635c2fc-227f-11ef-9ec9-00e18ce201d5', 'advanced-calculus.jpg', '1988', 12),
+('0132102926', 'Marketing Management', 'academic', 'e635c319-227f-11ef-9ec9-00e18ce201d5', 'marketing-management.jpg', '2009', 13),
+('0262032937', 'Introduction to Algorithms', 'academic', 'e635c34f-227f-11ef-9ec9-00e18ce201d5', 'introduction-to-algorithms.jpg', '2001', 14),
+('0073057920', 'Linear Algebra and Its Applications', 'academic', 'e635c368-227f-11ef-9ec9-00e18ce201d5', 'linear-algebra-and-its-applications.jpg', '1980', 15);
+
+

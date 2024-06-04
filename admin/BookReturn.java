@@ -3,6 +3,8 @@ package admin;
 import assets.Colors;
 import entities.User;
 import views.Sidebar;
+import entities.Author;
+import entities.BorrowedBook;
 import entities.Session;
 
 import javax.swing.*;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class BookReturn extends JFrame {
 
@@ -20,14 +23,13 @@ public class BookReturn extends JFrame {
   private JPanel bookPanel;
   private JButton returnButton;
   private JButton payButton;
-  private List<JCheckBox> bookCheckBoxes;
+  private List<BorrowedBook> selectedBooks = new ArrayList<>();
   private JLabel penaltyLabel;
   private JTextField paymentField;
 
   public BookReturn(Connection conn) {
     this.conn = conn;
     this.user = Session.getInstance().getUser();
-    bookCheckBoxes = new ArrayList<>();
 
     SwingUtilities.invokeLater(this::display);
   }
@@ -56,8 +58,9 @@ public class BookReturn extends JFrame {
     // Return Button
     returnButton = new JButton("Return Selected Books");
     returnButton.setBackground(Colors.GREEN);
-    returnButton.setForeground(Colors.TEXT);
+    returnButton.setForeground(Colors.BASE);
     returnButton.addActionListener(e -> returnSelectedBooks());
+    returnButton.setVisible(false);
     buttonsPanel.add(returnButton);
 
     // Payment Components
@@ -72,8 +75,8 @@ public class BookReturn extends JFrame {
 
     // Pay Button
     payButton = new JButton("Pay Penalty");
-    payButton.setBackground(Colors.GREEN);
-    payButton.setForeground(Colors.TEXT);
+    payButton.setBackground(Colors.LAVENDER);
+    payButton.setForeground(Colors.BASE);
     payButton.addActionListener(e -> payPenalty());
     buttonsPanel.add(payButton);
 
@@ -81,67 +84,175 @@ public class BookReturn extends JFrame {
   }
 
   private void loadBorrowedBooks() {
-    String query = "SELECT bb.id, b.title, bb.due_date, bb.returned_at, "
-        + " CASE WHEN bb.returned_at IS NULL THEN DATEDIFF(CURDATE(), bb.due_date) ELSE 0 END AS days_late, "
-        + " COALESCE(p.amount, 0) AS amount"
-        + " FROM book_borrows bb "
-        + " JOIN books b ON bb.book_id = b.id "
-        + " LEFT JOIN penalties p ON p.user_role = ? "
-        + " WHERE bb.user_id = ? AND bb.returned_at IS NULL";
+    List<BorrowedBook> borrowedBooks = fetchBorrowedBooksFromDatabase();
 
-    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-      stmt.setString(1, user.getRole()); // Assuming the User class has a getRole() method
-      stmt.setString(2, user.getId());
-      ResultSet rs = stmt.executeQuery();
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(10, 10, 10, 10);
+    gbc.gridx = 0;
+    gbc.gridy = 0;
 
-      GridBagConstraints gbc = new GridBagConstraints();
-      gbc.insets = new Insets(10, 10, 10, 10);
-      gbc.gridx = 0;
-      gbc.gridy = 0;
+    for (BorrowedBook book : borrowedBooks) {
+      JPanel bookCard = createBorrowedBookCard(book);
+      bookPanel.add(bookCard, gbc);
 
-      while (rs.next()) {
-        int borrowId = rs.getInt("id");
-        String title = rs.getString("title");
-        LocalDate dueDate = rs.getDate("due_date").toLocalDate();
-        int daysLate = rs.getInt("days_late");
-        double penaltyAmount = rs.getDouble("amount");
-
-        JCheckBox checkBox = new JCheckBox(title + " (Due: " + dueDate + ")");
-        checkBox.setFont(new Font("Arial", Font.PLAIN, 16));
-        checkBox.setBackground(Colors.MANTLE);
-        checkBox.setForeground(Colors.TEXT);
-        checkBox.putClientProperty("borrowId", borrowId);
-        checkBox.putClientProperty("daysLate", daysLate);
-        checkBox.putClientProperty("penaltyAmount", penaltyAmount);
-        bookCheckBoxes.add(checkBox);
-        bookPanel.add(checkBox, gbc);
-
+      if (gbc.gridx == 2) {
+        gbc.gridx = 0;
         gbc.gridy++;
+      } else {
+        gbc.gridx++;
+      }
+    }
+  }
+
+  private List<BorrowedBook> fetchBorrowedBooksFromDatabase() {
+    List<BorrowedBook> books = new ArrayList<>();
+    String query = "SELECT b.id, b.isbn, b.title, b.category, b.copyright, p.name AS publisher_name, "
+        +
+        " a.first_name, a.middle_name, a.last_name, a.suffix_name, bb.borrowed_at, bb.due_date, bb.id AS book_borrow_id, "
+        +
+        "CASE WHEN CURDATE() > bb.due_date THEN DATEDIFF(CURDATE(), bb.due_date) * p.amount ELSE 0 END AS penalty_amount, b.image_url "
+        +
+        "FROM book_borrows bb " +
+        "JOIN books b ON bb.book_id = b.id " +
+        "JOIN authors a ON b.author_id = a.id " +
+        "JOIN publishers p ON p.id = b.publisher_id"
+        +
+        "JOIN penalties p ON p.user_role = ? " +
+        "WHERE bb.returned_at IS NULL AND bb.user_id = ?";
+
+    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+      preparedStatement.setString(1, user.getRole());
+      preparedStatement.setString(2, user.getId());
+      ResultSet resultSet = preparedStatement.executeQuery();
+
+      while (resultSet.next()) {
+        int id = resultSet.getInt("id");
+        int bookBorrowId = resultSet.getInt("book_borrow_id");
+        int copyright = resultSet.getInt("copyright");
+        String isbn = resultSet.getString("isbn");
+        String title = resultSet.getString("title");
+        String category = resultSet.getString("category");
+        String authorFullName = resultSet.getString("first_name") + " " +
+            (resultSet.getString("middle_name") != null ? resultSet.getString("middle_name") + " " : "") +
+            resultSet.getString("last_name") + " " +
+            (resultSet.getString("suffix_name") != null ? resultSet.getString("suffix_name") : "");
+        Date borrowedAt = resultSet.getDate("borrowed_at");
+        Date dueDate = resultSet.getDate("due_date");
+        double penaltyAmount = resultSet.getDouble("penalty_amount");
+        String imageUrl = resultSet.getString("image_url");
+        String publisherName = resultSet.getString("publisher_name");
+
+        BorrowedBook book = new BorrowedBook(id, isbn, title, category, authorFullName, true, imageUrl, authorFullName,
+            user.getId(), borrowedAt, dueDate, penaltyAmount, bookBorrowId, copyright, publisherName);
+
+        books.add(book);
       }
     } catch (SQLException e) {
       e.printStackTrace();
     }
+    return books;
+  }
+
+  private JPanel createBorrowedBookCard(BorrowedBook book) {
+    JPanel card = new JPanel(new BorderLayout());
+    card.setPreferredSize(new Dimension(300, 400));
+    card.setBorder(BorderFactory.createLineBorder(Colors.OVERLAY1, 2));
+    card.setBackground(Colors.MANTLE);
+
+    // Book Image
+    JLabel imageLabel = new JLabel();
+    ImageIcon imageIcon;
+
+    if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
+      imageIcon = new ImageIcon(getClass().getResource("../assets/images/" + book.getImageUrl()));
+    } else {
+      imageIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
+    }
+
+    Image img = imageIcon.getImage();
+    Image resizedImg = img.getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    imageIcon = new ImageIcon(resizedImg);
+
+    imageLabel.setIcon(imageIcon);
+    card.add(imageLabel, BorderLayout.CENTER);
+
+    // Book Details
+    JPanel detailsPanel = new JPanel(new GridLayout(0, 1));
+    detailsPanel.setBackground(Colors.BASE);
+    detailsPanel.setForeground(Colors.TEXT);
+    detailsPanel.add(createDetailLabel(book.getTitle(), Font.BOLD));
+    detailsPanel.add(createDetailLabel(book.getCategory()));
+    detailsPanel.add(createDetailLabel(book.getAuthorFullName()));
+    detailsPanel.add(createDetailLabel("Borrowed At: " + book.getBorrowedAt().toString()));
+    detailsPanel.add(createDetailLabel("Due Date: " + book.getDueDate().toString()));
+    detailsPanel.add(createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount()));
+
+    card.add(detailsPanel, BorderLayout.SOUTH);
+
+    Font font = new Font("Arial", Font.PLAIN, 18);
+
+    JCheckBox selectCheckBox = new JCheckBox("Select");
+    selectCheckBox.setFont(font);
+    selectCheckBox.setBackground(Colors.BASE);
+    selectCheckBox.setForeground(Colors.TEXT);
+    selectCheckBox.setFocusPainted(false);
+    selectCheckBox.setBorderPainted(false);
+
+    selectCheckBox.addActionListener(e -> {
+      if (selectCheckBox.isSelected()) {
+        selectedBooks.add(book);
+      } else {
+        selectedBooks.remove(book);
+      }
+
+      returnButton.setVisible(!selectedBooks.isEmpty());
+    });
+    detailsPanel.add(selectCheckBox);
+
+    return card;
+  }
+
+  private JLabel createDetailLabel(String text) {
+    return createDetailLabel(text, Colors.TEXT);
+  }
+
+  private JLabel createDetailLabel(String text, Color color) {
+    return createDetailLabel(text, color, Font.PLAIN);
+  }
+
+  private JLabel createDetailLabel(String text, int style) {
+    return createDetailLabel(text, Colors.TEXT, style);
+  }
+
+  private JLabel createDetailLabel(String text, Color color, int style) {
+    JLabel label = new JLabel(text);
+    label.setFont(new Font("Arial", style, 16));
+    label.setForeground(color);
+    return label;
   }
 
   private void returnSelectedBooks() {
-    List<Integer> selectedBooks = new ArrayList<>();
     int totalDaysLate = 0;
     double totalPenaltyAmount = 0;
 
-    for (JCheckBox checkBox : bookCheckBoxes) {
-      if (checkBox.isSelected()) {
-        int borrowId = (int) checkBox.getClientProperty("borrowId");
-        int daysLate = (int) checkBox.getClientProperty("daysLate");
-        double penaltyAmount = (double) checkBox.getClientProperty("penaltyAmount");
+    for (BorrowedBook book : selectedBooks) {
+      double penaltyAmount = book.getPenaltyAmount();
+      Date currentDate = new Date(System.currentTimeMillis());
+      long diffInMilliseconds = currentDate.getTime() - book.getDueDate().getTime();
+      totalDaysLate = (int) TimeUnit.DAYS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
 
-        selectedBooks.add(borrowId);
-        totalDaysLate += daysLate;
-        totalPenaltyAmount += daysLate * penaltyAmount;
+      System.out.println(penaltyAmount);
+      System.out.println(totalDaysLate);
+
+      if (totalDaysLate < 0) {
+        totalDaysLate = 0;
       }
+
+      totalPenaltyAmount += penaltyAmount;
     }
 
     if (totalDaysLate > 0) {
-      penaltyLabel.setText("Total Penalty: $" + totalPenaltyAmount + " (Days Late: " + totalDaysLate + ")");
+      penaltyLabel.setText("Total Penalty: Php. " + totalPenaltyAmount + " (Days Late: " + totalDaysLate + ")");
       returnButton.setEnabled(false);
     } else {
       updateReturnDates(selectedBooks);
@@ -149,19 +260,33 @@ public class BookReturn extends JFrame {
   }
 
   private void payPenalty() {
-    double totalPenaltyAmount = Double.parseDouble(penaltyLabel.getText().replaceAll("[^\\d.]", ""));
-    double payment = Double.parseDouble(paymentField.getText());
+    int totalDaysLate = 0;
+    double totalPenaltyAmount = 0;
 
-    if (payment >= totalPenaltyAmount) {
-      List<Integer> selectedBooks = new ArrayList<>();
-      for (JCheckBox checkBox : bookCheckBoxes) {
-        if (checkBox.isSelected()) {
-          selectedBooks.add((int) checkBox.getClientProperty("borrowId"));
-        }
+    for (BorrowedBook book : selectedBooks) {
+      double penaltyAmount = book.getPenaltyAmount();
+      Date currentDate = new Date(System.currentTimeMillis());
+      long diffInMilliseconds = currentDate.getTime() - book.getDueDate().getTime();
+      totalDaysLate = (int) TimeUnit.DAYS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
+
+      System.out.println(penaltyAmount);
+      System.out.println(totalDaysLate);
+
+      if (totalDaysLate < 0) {
+        totalDaysLate = 0;
       }
 
-      recordPenaltyPayment(selectedBooks, totalPenaltyAmount);
-      updateReturnDates(selectedBooks);
+      totalPenaltyAmount += penaltyAmount;
+    }
+
+    double payment = Double.parseDouble(paymentField.getText());
+    double change = payment - totalPenaltyAmount;
+
+    if (payment >= totalPenaltyAmount) {
+
+      recordPenaltyPayment(totalPenaltyAmount);
+      // updateReturnDates(selectedBooks);
+      JOptionPane.showMessageDialog(this, "Payment successful. Your change is: Php. " + change);
       penaltyLabel.setText("");
       paymentField.setText("");
       returnButton.setEnabled(true);
@@ -170,12 +295,12 @@ public class BookReturn extends JFrame {
     }
   }
 
-  private void recordPenaltyPayment(List<Integer> selectedBooks, double totalPenaltyAmount) {
+  private void recordPenaltyPayment(double totalPenaltyAmount) {
     String insertQuery = "INSERT INTO book_penalties (payment_amount, book_borrow_id, penalty_id) VALUES (?, ?, (SELECT id FROM penalties WHERE user_role = ?))";
     try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-      for (int borrowId : selectedBooks) {
+      for (BorrowedBook book : selectedBooks) {
         stmt.setDouble(1, totalPenaltyAmount);
-        stmt.setInt(2, borrowId);
+        stmt.setInt(2, book.getBookBorrowId());
         stmt.setString(3, user.getRole());
         stmt.executeUpdate();
       }
@@ -184,15 +309,17 @@ public class BookReturn extends JFrame {
     }
   }
 
-  private void updateReturnDates(List<Integer> selectedBooks) {
+  private void updateReturnDates(List<BorrowedBook> selectedBooks) {
     String updateQuery = "UPDATE book_borrows SET returned_at = CURDATE() WHERE id = ?";
     try (PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
-      for (int borrowId : selectedBooks) {
-        stmt.setInt(1, borrowId);
+      for (BorrowedBook book : selectedBooks) {
+        stmt.setInt(1, book.getBookBorrowId());
         stmt.executeUpdate();
       }
+
       JOptionPane.showMessageDialog(this, "Books returned successfully!");
       dispose();
+      new BookReturn(conn);
     } catch (SQLException e) {
       e.printStackTrace();
     }

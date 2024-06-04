@@ -87,13 +87,19 @@ public class BookList extends JFrame {
 
   private List<Book> fetchBooksFromDatabase() {
     List<Book> books = new ArrayList<>();
-    String query = "SELECT b.id, b.isbn, b.title, b.category, b.author_id, b.image_url, a.first_name AS author_first_name, a.middle_name AS author_middle_name, a.last_name AS author_last_name, a.suffix_name AS author_suffix_name, bb.user_id AS borrower_id, "
+    String query = "SELECT b.id, b.isbn, b.title, b.category, b.author_id, b.image_url, b.copyright, "
+        +
+        " a.first_name AS author_first_name, a.middle_name AS author_middle_name, a.last_name AS author_last_name, a.suffix_name AS author_suffix_name, bb.user_id AS borrower_id, "
+        +
+        " p.name AS publisher_name, "
         +
         " (SELECT returned_at IS NULL FROM book_borrows WHERE book_id = b.id AND returned_at IS NULL LIMIT 1) AS borrowed "
         +
         " FROM books b"
         +
         " LEFT JOIN authors a ON b.author_id = a.id"
+        +
+        " LEFT JOIN publishers p ON p.id = b.publisher_id"
         +
         " LEFT JOIN book_borrows bb ON bb.book_id = b.id";
 
@@ -110,14 +116,17 @@ public class BookList extends JFrame {
         boolean borrowed = rs.getBoolean("borrowed");
         String imageUrl = rs.getString("image_url");
         String borrowerId = rs.getString("borrower_id");
+        int copyright = rs.getInt("copyright");
+        String publisherName = rs.getString("publisher_name");
 
-        // TODO: Put the full author name on the book
         String authorFirstName = rs.getString("author_first_name");
         String authorMiddleName = rs.getString("author_middle_name");
         String authorLastName = rs.getString("author_last_name");
         String authorSuffixName = rs.getString("author_suffix_name");
+        Author author = new Author(authorFirstName, authorMiddleName, authorLastName, authorSuffixName);
 
-        books.add(new Book(id, isbn, title, category, authorId, borrowed, imageUrl, authorFirstName, borrowerId));
+        books.add(new Book(id, isbn, title, category, authorId, borrowed, imageUrl, author.getFullName(), borrowerId,
+            copyright, publisherName));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -136,7 +145,7 @@ public class BookList extends JFrame {
     ImageIcon imageIcon;
 
     if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
-      imageIcon = new ImageIcon(getClass().getResource("../assets/images/" + book.getImageUrl()));
+      imageIcon = new ImageIcon(getClass().getResource("../assets/images/books/" + book.getImageUrl()));
     } else {
       imageIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
     }
@@ -152,12 +161,12 @@ public class BookList extends JFrame {
     JPanel detailsPanel = new JPanel(new GridLayout(0, 1));
     detailsPanel.setBackground(Colors.BASE);
     detailsPanel.setForeground(Colors.TEXT);
-    detailsPanel.add(createDetailLabel("Title: " + book.getTitle()));
-    detailsPanel.add(createDetailLabel("Category: " + book.getCategory()));
-    detailsPanel.add(createDetailLabel("Author: " + book.getAuthorFullName()));
+    detailsPanel.add(createDetailLabel(book.getTitle(), Font.BOLD));
+    detailsPanel.add(createDetailLabel(book.getAuthorFullName()));
+    detailsPanel.add(categoryLabel(book.getCategory()));
 
     if (book.isBorrowed()) {
-      String label = "Status: Borrowed";
+      String label = "Borrowed";
 
       if (book.getBorrowerId().equalsIgnoreCase(user.getId())) {
         label += " (You)";
@@ -165,7 +174,9 @@ public class BookList extends JFrame {
 
       detailsPanel.add(createDetailLabel(label, Colors.RED));
     } else {
-      detailsPanel.add(createDetailLabel("Status: Returned", Colors.GREEN));
+      if (!book.getCategory().equalsIgnoreCase("academic")) {
+        detailsPanel.add(createDetailLabel("Returned", Colors.GREEN));
+      }
     }
 
     card.add(detailsPanel, BorderLayout.SOUTH);
@@ -173,6 +184,7 @@ public class BookList extends JFrame {
     Font font = new Font("Arial", Font.PLAIN, 18);
 
     JCheckBox selectCheckBox = new JCheckBox("Select");
+    Dimension selectCheckboxDimension = selectCheckBox.getBounds().getSize();
     selectCheckBox.setFont(font);
     selectCheckBox.setBackground(Colors.BASE);
     selectCheckBox.setForeground(Colors.TEXT);
@@ -190,9 +202,36 @@ public class BookList extends JFrame {
 
       borrowButton.setVisible(!selectedBooks.isEmpty());
     });
-    detailsPanel.add(selectCheckBox);
+
+    if (!book.getCategory().equalsIgnoreCase("academic")) {
+      detailsPanel.add(selectCheckBox);
+    } else {
+      JPanel ghostElement = new JPanel();
+      ghostElement.setPreferredSize(selectCheckboxDimension);
+      ghostElement.setBackground(Colors.BASE);
+
+      detailsPanel.add(ghostElement);
+    }
 
     return card;
+  }
+
+  private JLabel categoryLabel(String category) {
+    String cap = category.substring(0, 1).toUpperCase() + category.substring(1);
+
+    if (category.equalsIgnoreCase("fictional")) {
+      return createDetailLabel(cap, Colors.MAUVE);
+    }
+
+    if (category.equalsIgnoreCase("non-fictional")) {
+      return createDetailLabel(cap, Colors.SKY);
+    }
+
+    if (category.equalsIgnoreCase("academic")) {
+      return createDetailLabel(cap, Colors.PEACH);
+    }
+
+    return createDetailLabel(cap, Colors.TEXT);
   }
 
   private JLabel createDetailLabel(String text) {
@@ -200,10 +239,17 @@ public class BookList extends JFrame {
   }
 
   private JLabel createDetailLabel(String text, Color color) {
-    JLabel label = new JLabel(text);
-    label.setFont(new Font("Arial", Font.PLAIN, 16));
-    label.setForeground(color);
+    return createDetailLabel(text, color, Font.PLAIN);
+  }
 
+  private JLabel createDetailLabel(String text, int style) {
+    return createDetailLabel(text, Colors.TEXT, style);
+  }
+
+  private JLabel createDetailLabel(String text, Color color, int style) {
+    JLabel label = new JLabel(text);
+    label.setFont(new Font("Arial", style, 16));
+    label.setForeground(color);
     return label;
   }
 
