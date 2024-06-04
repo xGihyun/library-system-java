@@ -4,6 +4,10 @@ import admin.BookList;
 import admin.BookReturn;
 import admin.BorrowerList;
 import auth.Login;
+import auth.Register;
+import auth.RegisterRole;
+import auth.RegisterStudent;
+import auth.RegisterTeacher;
 import database.Database;
 
 public class Main {
@@ -19,5 +23,7 @@ public class Main {
     // new BorrowerList(conn);
     // new BookList(conn);
     new Login(conn);
+    // new RegisterRole(conn);
+    // new RegisterStudent(conn);
   }
 }

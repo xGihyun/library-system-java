@@ -1,6 +1,8 @@
 package views;
 
 import assets.Colors;
+import auth.Login;
+import entities.Session;
 
 import javax.swing.*;
 
@@ -39,8 +41,17 @@ public class Sidebar extends JPanel {
     // Placeholder panel to push buttons to the top
     JPanel spacerPanel = new JPanel();
     spacerPanel.setBackground(Colors.BASE);
-    spacerPanel.setMinimumSize(new Dimension(200, Integer.MAX_VALUE));
+    spacerPanel.setMinimumSize(new Dimension(100, Integer.MAX_VALUE));
     add(spacerPanel);
+
+    addButton("Logout", e -> logout());
+  }
+
+  private void logout() {
+    Session.deleteInstance();
+    parentFrame.dispose();
+
+    new Login(conn);
   }
 
     

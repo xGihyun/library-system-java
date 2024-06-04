@@ -6,6 +6,7 @@ import javax.swing.table.*;
 
 import assets.Colors;
 import entities.Student;
+import entities.Teacher;
 import views.Sidebar;
 
 import java.awt.*;
@@ -63,7 +64,8 @@ public class BorrowerList extends JFrame {
     List<Student> students = fetchStudents();
     displayStudents(studentPanel, students);
 
-    // TODO: Fetch and display teachers (similar approach can be used for teachers)
+    List<Teacher> teachers = fetchTeachers();
+    displayTeachers(teacherPanel, teachers);
 
     add(tabbedPane, BorderLayout.CENTER);
 
@@ -75,26 +77,30 @@ public class BorrowerList extends JFrame {
 
     String query = "SELECT stu.id AS student_id, stu.section_level_id, stu.user_id, "
         + " u.first_name, u.middle_name, u.last_name, u.suffix_name, "
-        + " sec.name AS section_name, yl.name AS year_level_name"
+        + " sec.name AS section_name, yl.name AS year_level_name, COUNT(bb.id) AS book_borrow_count"
         + " FROM students stu"
         + " JOIN users u ON u.id = stu.user_id"
         + " JOIN section_levels seclvl ON seclvl.id = stu.section_level_id"
         + " JOIN sections sec ON sec.id = seclvl.section_id"
-        + " JOIN year_levels yl ON yl.id = seclvl.year_level_id";
+        + " JOIN year_levels yl ON yl.id = seclvl.year_level_id"
+        + " JOIN book_borrows bb ON bb.user_id = stu.user_id"
+        + " WHERE bb.returned_at IS NULL"
+        + " GROUP BY stu.id";
 
     try (PreparedStatement stmt = conn.prepareStatement(query)) {
-      ResultSet resultSet = stmt.executeQuery();
+      ResultSet rs = stmt.executeQuery();
 
-      while (resultSet.next()) {
-        String studentId = resultSet.getString("student_id");
-        String sectionLevelId = resultSet.getString("section_level_id");
-        String userId = resultSet.getString("user_id");
-        String firstName = resultSet.getString("first_name");
-        String middleName = resultSet.getString("middle_name");
-        String lastName = resultSet.getString("last_name");
-        String suffixName = resultSet.getString("suffix_name");
-        String sectionName = resultSet.getString("section_name");
-        String yearLevelName = resultSet.getString("year_level_name");
+      while (rs.next()) {
+        String studentId = rs.getString("student_id");
+        String sectionLevelId = rs.getString("section_level_id");
+        String userId = rs.getString("user_id");
+        String firstName = rs.getString("first_name");
+        String middleName = rs.getString("middle_name");
+        String lastName = rs.getString("last_name");
+        String suffixName = rs.getString("suffix_name");
+        String sectionName = rs.getString("section_name");
+        String yearLevelName = rs.getString("year_level_name");
+        int bookBorrowCount = rs.getInt("book_borrow_count");
 
         students.add(new Student(studentId, sectionLevelId, userId, firstName, middleName, lastName, suffixName,
             sectionName, yearLevelName));
@@ -104,6 +110,41 @@ public class BorrowerList extends JFrame {
     }
 
     return students;
+  }
+
+  private List<Teacher> fetchTeachers() {
+    List<Teacher> teachers = new ArrayList<>();
+
+    String query = "SELECT t.id AS teacher_id, t.user_id, d.name AS department_name,"
+        + " u.first_name, u.middle_name, u.last_name, u.suffix_name, "
+        + " COUNT(bb.id) AS book_borrow_count"
+        + " FROM teachers t"
+        + " JOIN users u ON u.id = t.user_id"
+        + " JOIN departments d ON d.id = t.department_id"
+        + " JOIN book_borrows bb ON bb.user_id = t.user_id"
+        + " WHERE bb.returned_at IS NULL"
+        + " GROUP BY t.id";
+
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        String employeeId = rs.getString("teacher_id");
+        String userId = rs.getString("user_id");
+        String firstName = rs.getString("first_name");
+        String middleName = rs.getString("middle_name");
+        String lastName = rs.getString("last_name");
+        String suffixName = rs.getString("suffix_name");
+        String departmentName = rs.getString("department_name");
+        int bookBorrowCount = rs.getInt("book_borrow_count");
+
+        teachers.add(new Teacher(userId, employeeId, firstName, middleName, lastName, suffixName, departmentName));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return teachers;
   }
 
   private void displayStudents(JPanel panel, List<Student> students) {
@@ -125,12 +166,32 @@ public class BorrowerList extends JFrame {
     panel.add(scrollPane, BorderLayout.CENTER);
   }
 
+  private void displayTeachers(JPanel panel, List<Teacher> teachers) {
+    String[] columnNames = { "Name", "Employee ID", "Department" };
+    DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+    for (Teacher teacher : teachers) {
+
+      Object[] row = new Object[] { teacher.getFullName(), teacher.getEmployeeId(), teacher.getDepartmentName() };
+
+      model.addRow(row);
+    }
+
+    JTable table = new JTable(model);
+    styleTable(table);
+
+    JScrollPane scrollPane = new JScrollPane(table);
+    panel.add(scrollPane, BorderLayout.CENTER);
+  }
+
   private void styleTable(JTable table) {
     table.setFont(new Font("Arial", Font.PLAIN, 18));
     table.setRowHeight(30);
     table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
     table.getTableHeader().setBackground(Colors.BLUE);
     table.getTableHeader().setForeground(Colors.BASE);
+    table.setOpaque(true);
+    table.setFillsViewportHeight(true);
     table.setBackground(Colors.MANTLE);
     table.setForeground(Colors.TEXT);
     table.setSelectionBackground(Colors.OVERLAY1);

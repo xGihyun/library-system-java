@@ -5,6 +5,8 @@ import entities.*;
 import views.Sidebar;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,13 +15,20 @@ import java.util.List;
 public class BookList extends JFrame {
   private Connection conn;
   private List<Book> selectedBooks = new ArrayList<>();
-  private boolean canBorrow;
+  // private boolean canBorrow;
   private JButton borrowButton;
   private User user;
+  private int maxBorrowedBooksCount;
 
   public BookList(Connection conn) {
     this.conn = conn;
     this.user = Session.getInstance().getUser();
+
+    if (user.getRole().equalsIgnoreCase("student")) {
+      maxBorrowedBooksCount = 2;
+    } else if (user.getRole().equalsIgnoreCase("teacher")) {
+      maxBorrowedBooksCount = 5;
+    }
 
     SwingUtilities.invokeLater(this::createAndShowBookList);
   }
@@ -47,7 +56,7 @@ public class BookList extends JFrame {
     List<Book> books = fetchBooksFromDatabase();
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(10, 10, 10, 10);
+    gbc.insets = new Insets(4, 4, 4, 4);
     gbc.gridx = 0;
     gbc.gridy = 0;
 
@@ -62,6 +71,12 @@ public class BookList extends JFrame {
         gbc.gridx++;
       }
     }
+
+    int borrowedBooksCount = fetchBorrowedBooksCount();
+
+    maxBorrowedBooksCount -= borrowedBooksCount;
+
+    System.out.println(maxBorrowedBooksCount);
 
     // Add Book Button
     // JButton addBookButton = new JButton("Add Book");
@@ -87,15 +102,24 @@ public class BookList extends JFrame {
 
   private List<Book> fetchBooksFromDatabase() {
     List<Book> books = new ArrayList<>();
-    String query = "SELECT b.id, b.isbn, b.title, b.category, b.author_id, b.image_url, a.first_name AS author_first_name, a.middle_name AS author_middle_name, a.last_name AS author_last_name, a.suffix_name AS author_suffix_name, bb.user_id AS borrower_id, "
+    String query = "SELECT b.id, b.isbn, b.title, b.category, b.author_id, b.image_url, b.copyright, "
         +
-        " (SELECT returned_at IS NULL FROM book_borrows WHERE book_id = b.id AND returned_at IS NULL LIMIT 1) AS borrowed "
+        " a.first_name AS author_first_name, a.middle_name AS author_middle_name, a.last_name AS author_last_name, a.suffix_name AS author_suffix_name, latest_bb.user_id AS borrower_id,   "
+        +
+        " p.name AS publisher_name, "
+        +
+        " CASE WHEN latest_bb.returned_at IS NULL AND latest_bb.user_id IS NOT NULL THEN 1 ELSE 0 END AS borrowed"
         +
         " FROM books b"
         +
         " LEFT JOIN authors a ON b.author_id = a.id"
         +
-        " LEFT JOIN book_borrows bb ON bb.book_id = b.id";
+        " LEFT JOIN publishers p ON p.id = b.publisher_id"
+        +
+        " LEFT JOIN (SELECT book_id, user_id, returned_at FROM book_borrows bb1 WHERE returned_at IS NULL AND NOT EXISTS "
+        +
+        " (SELECT 1 FROM book_borrows bb2 WHERE bb1.book_id = bb2.book_id AND bb1.borrowed_at < bb2.borrowed_at)"
+        + " ) AS latest_bb ON latest_bb.book_id = b.id";
 
     try (PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -110,14 +134,17 @@ public class BookList extends JFrame {
         boolean borrowed = rs.getBoolean("borrowed");
         String imageUrl = rs.getString("image_url");
         String borrowerId = rs.getString("borrower_id");
+        int copyright = rs.getInt("copyright");
+        String publisherName = rs.getString("publisher_name");
 
-        // TODO: Put the full author name on the book
         String authorFirstName = rs.getString("author_first_name");
         String authorMiddleName = rs.getString("author_middle_name");
         String authorLastName = rs.getString("author_last_name");
         String authorSuffixName = rs.getString("author_suffix_name");
+        Author author = new Author(authorFirstName, authorMiddleName, authorLastName, authorSuffixName);
 
-        books.add(new Book(id, isbn, title, category, authorId, borrowed, imageUrl, authorFirstName, borrowerId));
+        books.add(new Book(id, isbn, title, category, authorId, borrowed, imageUrl, author.getFullName(), borrowerId,
+            copyright, publisherName));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -136,7 +163,7 @@ public class BookList extends JFrame {
     ImageIcon imageIcon;
 
     if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
-      imageIcon = new ImageIcon(getClass().getResource("../assets/images/" + book.getImageUrl()));
+      imageIcon = new ImageIcon(getClass().getResource("../assets/images/books/" + book.getImageUrl()));
     } else {
       imageIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
     }
@@ -152,12 +179,16 @@ public class BookList extends JFrame {
     JPanel detailsPanel = new JPanel(new GridLayout(0, 1));
     detailsPanel.setBackground(Colors.BASE);
     detailsPanel.setForeground(Colors.TEXT);
-    detailsPanel.add(createDetailLabel("Title: " + book.getTitle()));
-    detailsPanel.add(createDetailLabel("Category: " + book.getCategory()));
-    detailsPanel.add(createDetailLabel("Author: " + book.getAuthorFullName()));
+    detailsPanel.add(createDetailLabel(book.getTitle(), Font.BOLD));
+    detailsPanel.add(createDetailLabel(book.getAuthorFullName()));
+    detailsPanel.add(createDetailLabel(book.getPublisherName()));
+    detailsPanel.add(createDetailLabel(book.getIsbn()));
+    detailsPanel.add(createDetailLabel("Copyright " + book.getCopyright()));
+    detailsPanel.add(categoryLabel(book.getCategory()));
+    detailsPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
 
     if (book.isBorrowed()) {
-      String label = "Status: Borrowed";
+      String label = "Borrowed";
 
       if (book.getBorrowerId().equalsIgnoreCase(user.getId())) {
         label += " (You)";
@@ -165,7 +196,9 @@ public class BookList extends JFrame {
 
       detailsPanel.add(createDetailLabel(label, Colors.RED));
     } else {
-      detailsPanel.add(createDetailLabel("Status: Returned", Colors.GREEN));
+      if (!book.getCategory().equalsIgnoreCase("academic")) {
+        detailsPanel.add(createDetailLabel("Returned", Colors.GREEN));
+      }
     }
 
     card.add(detailsPanel, BorderLayout.SOUTH);
@@ -173,6 +206,7 @@ public class BookList extends JFrame {
     Font font = new Font("Arial", Font.PLAIN, 18);
 
     JCheckBox selectCheckBox = new JCheckBox("Select");
+    Dimension selectCheckboxDimension = selectCheckBox.getBounds().getSize();
     selectCheckBox.setFont(font);
     selectCheckBox.setBackground(Colors.BASE);
     selectCheckBox.setForeground(Colors.TEXT);
@@ -190,9 +224,36 @@ public class BookList extends JFrame {
 
       borrowButton.setVisible(!selectedBooks.isEmpty());
     });
-    detailsPanel.add(selectCheckBox);
+
+    if (!book.getCategory().equalsIgnoreCase("academic")) {
+      detailsPanel.add(selectCheckBox);
+    } else {
+      JPanel ghostElement = new JPanel();
+      ghostElement.setPreferredSize(selectCheckboxDimension);
+      ghostElement.setBackground(Colors.BASE);
+
+      detailsPanel.add(ghostElement);
+    }
 
     return card;
+  }
+
+  private JLabel categoryLabel(String category) {
+    String cap = category.substring(0, 1).toUpperCase() + category.substring(1);
+
+    if (category.equalsIgnoreCase("fictional")) {
+      return createDetailLabel(cap, Colors.MAUVE, Font.ITALIC);
+    }
+
+    if (category.equalsIgnoreCase("non-fictional")) {
+      return createDetailLabel(cap, Colors.SKY, Font.ITALIC);
+    }
+
+    if (category.equalsIgnoreCase("academic")) {
+      return createDetailLabel(cap, Colors.PEACH, Font.ITALIC);
+    }
+
+    return createDetailLabel(cap, Colors.TEXT, Font.ITALIC);
   }
 
   private JLabel createDetailLabel(String text) {
@@ -200,10 +261,17 @@ public class BookList extends JFrame {
   }
 
   private JLabel createDetailLabel(String text, Color color) {
-    JLabel label = new JLabel(text);
-    label.setFont(new Font("Arial", Font.PLAIN, 16));
-    label.setForeground(color);
+    return createDetailLabel(text, color, Font.PLAIN);
+  }
 
+  private JLabel createDetailLabel(String text, int style) {
+    return createDetailLabel(text, Colors.TEXT, style);
+  }
+
+  private JLabel createDetailLabel(String text, Color color, int style) {
+    JLabel label = new JLabel(text);
+    label.setFont(new Font("Arial", style, 16));
+    label.setForeground(color);
     return label;
   }
 
@@ -229,6 +297,28 @@ public class BookList extends JFrame {
     return authors;
   }
 
+  private int fetchBorrowedBooksCount() {
+    String query = "SELECT COUNT(*) AS count FROM book_borrows"
+        + " WHERE returned_at IS NULL AND user_id = ?";
+
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      stmt.setString(1, user.getId());
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (rs.next()) {
+        int currentBorrowedBooksCount = rs.getInt("count");
+
+        return currentBorrowedBooksCount;
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return 0;
+  }
+
   private boolean addBookToDatabase(String isbn, String title, String category, String authorId, String imageUrl) {
     String query = "INSERT INTO books (isbn, title, category, author_id, image_url) VALUES (?, ?, ?, ?, ?)";
 
@@ -252,13 +342,8 @@ public class BookList extends JFrame {
       return;
     }
 
-    if (user.getRole().equalsIgnoreCase("student") && selectedBooks.size() > 2) {
-      JOptionPane.showMessageDialog(this, "Sorry! You have exceeded the number of books (2) to be borrowed.");
-      return;
-    }
-
-    if (user.getRole().equalsIgnoreCase("teacher") && selectedBooks.size() > 5) {
-      JOptionPane.showMessageDialog(this, "Sorry! You have exceeded the number of books (5) to be borrowed.");
+    if (selectedBooks.size() > maxBorrowedBooksCount) {
+      JOptionPane.showMessageDialog(this, "Sorry! You have exceeded the number of books to be borrowed.");
       return;
     }
 
