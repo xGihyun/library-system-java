@@ -2,6 +2,7 @@ package admin;
 
 import assets.Colors;
 import entities.*;
+import views.Sidebar;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +31,8 @@ public class BookList extends JFrame {
     setLayout(new BorderLayout());
     setLocationRelativeTo(null);
 
+    add(new Sidebar(conn, this), BorderLayout.WEST);
+
     // Title Label
     // JLabel titleLabel = new JLabel("Book List");
     // titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -38,7 +41,7 @@ public class BookList extends JFrame {
 
     // Main panel for the book grid
     JPanel bookPanel = new JPanel(new GridBagLayout());
-    bookPanel.setBackground(Colors.BASE);
+    bookPanel.setBackground(Colors.MANTLE);
     add(new JScrollPane(bookPanel), BorderLayout.CENTER);
 
     List<Book> books = fetchBooksFromDatabase();
@@ -133,12 +136,15 @@ public class BookList extends JFrame {
     ImageIcon imageIcon;
 
     if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
-      System.out.println("IMAGE URL:");
-      System.out.println(book.getImageUrl());
-      imageIcon = new ImageIcon(book.getImageUrl());
+      imageIcon = new ImageIcon(getClass().getResource("../assets/images/" + book.getImageUrl()));
     } else {
       imageIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
     }
+
+    Image img = imageIcon.getImage();
+    Image resizedImg = img.getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    imageIcon = new ImageIcon(resizedImg);
+
     imageLabel.setIcon(imageIcon);
     card.add(imageLabel, BorderLayout.CENTER);
 

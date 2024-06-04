@@ -6,6 +6,7 @@ import javax.swing.table.*;
 
 import assets.Colors;
 import entities.Student;
+import views.Sidebar;
 
 import java.awt.*;
 import java.util.List;
@@ -31,6 +32,8 @@ public class BorrowerList extends JFrame {
 
     getContentPane().setBackground(Colors.BASE);
     getContentPane().setForeground(Colors.TEXT);
+
+    add(new Sidebar(conn, this), BorderLayout.WEST);
 
     JTabbedPane tabbedPane = new JTabbedPane();
 
