@@ -111,17 +111,16 @@ public class Login extends JFrame {
       // Add this after the login button creation in the Login class
 
       // Create the register button with modern look
-      JButton registerButton = new JButton("Register");
+      JButton registerButton = new JButton("<html>Don't have an account? <u>Register</u></html>");
       registerButton.setFont(font);
-      registerButton.setBackground(Colors.GREEN);
-      registerButton.setForeground(Colors.BASE);
+      registerButton.setBackground(Colors.BASE);
+      registerButton.setForeground(Colors.GREEN);
       registerButton.setFocusPainted(false);
       registerButton.setBorderPainted(false);
       gbc.gridx = 1;
       gbc.gridy = 3;
       loginPanel.add(registerButton, gbc);
 
-      // Action listener for the register button
       registerButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {

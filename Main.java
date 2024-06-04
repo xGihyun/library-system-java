@@ -22,8 +22,8 @@ public class Main {
     // new BookReturn(conn);
     // new BorrowerList(conn);
     // new BookList(conn);
-    // new Login(conn);
-    new RegisterRole(conn);
+    new Login(conn);
+    // new RegisterRole(conn);
     // new RegisterStudent(conn);
   }
 }

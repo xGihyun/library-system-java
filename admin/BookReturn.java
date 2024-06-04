@@ -3,15 +3,12 @@ package admin;
 import assets.Colors;
 import entities.User;
 import views.Sidebar;
-import entities.Author;
 import entities.BorrowedBook;
 import entities.Session;
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +52,6 @@ public class BookReturn extends JFrame {
     buttonsPanel.setBackground(Colors.BASE);
     add(buttonsPanel, BorderLayout.SOUTH);
 
-    // Return Button
     returnButton = new JButton("Return Selected Books");
     returnButton.setBackground(Colors.GREEN);
     returnButton.setForeground(Colors.BASE);
@@ -63,22 +59,25 @@ public class BookReturn extends JFrame {
     returnButton.setVisible(false);
     buttonsPanel.add(returnButton);
 
-    // Payment Components
-    penaltyLabel = new JLabel();
-    penaltyLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-    penaltyLabel.setForeground(Colors.TEXT);
-    buttonsPanel.add(penaltyLabel);
+    // Penalty stuff but for student only
+    if (user.getRole().equalsIgnoreCase("student")) {
+      penaltyLabel = new JLabel();
+      penaltyLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+      penaltyLabel.setForeground(Colors.TEXT);
+      buttonsPanel.add(penaltyLabel);
 
-    paymentField = new JTextField(10);
-    paymentField.setFont(new Font("Arial", Font.PLAIN, 16));
-    buttonsPanel.add(paymentField);
+      paymentField = new JTextField(10);
+      paymentField.setFont(new Font("Arial", Font.PLAIN, 16));
+      buttonsPanel.add(paymentField);
 
-    // Pay Button
-    payButton = new JButton("Pay Penalty");
-    payButton.setBackground(Colors.LAVENDER);
-    payButton.setForeground(Colors.BASE);
-    payButton.addActionListener(e -> payPenalty());
-    buttonsPanel.add(payButton);
+      payButton = new JButton("Pay Penalty");
+      payButton.setBackground(Colors.LAVENDER);
+      payButton.setForeground(Colors.BASE);
+      payButton.addActionListener(e -> payPenalty());
+      payButton.setEnabled(false);
+      buttonsPanel.add(payButton);
+
+    }
 
     setVisible(true);
   }
@@ -106,19 +105,19 @@ public class BookReturn extends JFrame {
 
   private List<BorrowedBook> fetchBorrowedBooksFromDatabase() {
     List<BorrowedBook> books = new ArrayList<>();
-    String query = "SELECT b.id, b.isbn, b.title, b.category, b.copyright, p.name AS publisher_name, "
+    String query = "SELECT b.id, b.isbn, b.title, b.category, b.copyright, pub.name AS publisher_name, "
         +
         " a.first_name, a.middle_name, a.last_name, a.suffix_name, bb.borrowed_at, bb.due_date, bb.id AS book_borrow_id, "
         +
-        "CASE WHEN CURDATE() > bb.due_date THEN DATEDIFF(CURDATE(), bb.due_date) * p.amount ELSE 0 END AS penalty_amount, b.image_url "
+        " CASE WHEN CURDATE() > bb.due_date THEN DATEDIFF(CURDATE(), bb.due_date) * pen.amount ELSE 0 END AS penalty_amount, b.image_url "
         +
-        "FROM book_borrows bb " +
-        "JOIN books b ON bb.book_id = b.id " +
-        "JOIN authors a ON b.author_id = a.id " +
-        "JOIN publishers p ON p.id = b.publisher_id"
+        " FROM book_borrows bb " +
+        " JOIN books b ON bb.book_id = b.id " +
+        " JOIN authors a ON b.author_id = a.id " +
+        " JOIN publishers pub ON pub.id = b.publisher_id"
         +
-        "JOIN penalties p ON p.user_role = ? " +
-        "WHERE bb.returned_at IS NULL AND bb.user_id = ?";
+        " LEFT JOIN penalties pen ON pen.user_role = ? " +
+        " WHERE bb.returned_at IS NULL AND bb.user_id = ?";
 
     try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
       preparedStatement.setString(1, user.getRole());
@@ -164,7 +163,7 @@ public class BookReturn extends JFrame {
     ImageIcon imageIcon;
 
     if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
-      imageIcon = new ImageIcon(getClass().getResource("../assets/images/" + book.getImageUrl()));
+      imageIcon = new ImageIcon(getClass().getResource("../assets/images/books/" + book.getImageUrl()));
     } else {
       imageIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
     }
@@ -184,8 +183,12 @@ public class BookReturn extends JFrame {
     detailsPanel.add(createDetailLabel(book.getCategory()));
     detailsPanel.add(createDetailLabel(book.getAuthorFullName()));
     detailsPanel.add(createDetailLabel("Borrowed At: " + book.getBorrowedAt().toString()));
-    detailsPanel.add(createDetailLabel("Due Date: " + book.getDueDate().toString()));
-    detailsPanel.add(createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount()));
+
+    if (user.getRole().equalsIgnoreCase("student")) {
+
+      detailsPanel.add(createDetailLabel("Due Date: " + book.getDueDate().toString()));
+      detailsPanel.add(createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount()));
+    }
 
     card.add(detailsPanel, BorderLayout.SOUTH);
 
@@ -203,6 +206,12 @@ public class BookReturn extends JFrame {
         selectedBooks.add(book);
       } else {
         selectedBooks.remove(book);
+      }
+
+      if (selectCheckBox.isSelected() && book.getPenaltyAmount() > 0) {
+        payButton.setEnabled(true);
+      } else {
+        payButton.setEnabled(false);
       }
 
       returnButton.setVisible(!selectedBooks.isEmpty());
@@ -285,8 +294,11 @@ public class BookReturn extends JFrame {
     if (payment >= totalPenaltyAmount) {
 
       recordPenaltyPayment(totalPenaltyAmount);
-      // updateReturnDates(selectedBooks);
+
       JOptionPane.showMessageDialog(this, "Payment successful. Your change is: Php. " + change);
+
+      updateReturnDates(selectedBooks);
+
       penaltyLabel.setText("");
       paymentField.setText("");
       returnButton.setEnabled(true);

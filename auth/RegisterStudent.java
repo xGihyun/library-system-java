@@ -264,6 +264,24 @@ public class RegisterStudent extends JFrame {
       }
     });
 
+    JButton loginButton = new JButton("<html>Already have an account? <u>Login</u></html>");
+    loginButton.setFont(font);
+    loginButton.setBackground(Colors.BASE);
+    loginButton.setForeground(Colors.GREEN);
+    loginButton.setFocusPainted(false);
+    loginButton.setBorderPainted(false);
+    gbc.gridx = 1;
+    gbc.gridy = 8;
+    registrationPanel.add(loginButton, gbc);
+
+    loginButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        dispose();
+        new Login(conn);
+      }
+    });
+
     JPanel imagePanel = new JPanel();
     imagePanel.setBackground(Colors.OVERLAY1);
     add(imagePanel);
@@ -294,7 +312,7 @@ public class RegisterStudent extends JFrame {
     return null;
   }
 
-  private boolean registerStudent(Connection conn, String studentId, String userId,  String sectionLevelId) {
+  private boolean registerStudent(Connection conn, String studentId, String userId, String sectionLevelId) {
     String query = "INSERT INTO students (id, section_level_id, user_id) VALUES (?, ?, ?)";
 
     try (PreparedStatement stmt = conn.prepareStatement(query)) {

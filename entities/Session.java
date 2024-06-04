@@ -15,6 +15,12 @@ public class Session {
     return instance;
   }
 
+  public static void deleteInstance() {
+    if (instance != null) {
+      instance = null;
+    }
+  }
+
   public void setUser(User user) {
     this.user = user;
   }
