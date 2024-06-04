@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 27, 2024 at 01:56 PM
+-- Generation Time: Jun 04, 2024 at 09:36 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -28,12 +28,19 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `authors` (
-  `id` char(36) NOT NULL,
+  `id` char(36) NOT NULL DEFAULT uuid(),
   `first_name` varchar(255) NOT NULL,
   `middle_name` varchar(255) DEFAULT NULL,
   `last_name` varchar(255) NOT NULL,
   `suffix_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `authors`
+--
+
+INSERT INTO `authors` (`id`, `first_name`, `middle_name`, `last_name`, `suffix_name`) VALUES
+('88503003-2212-11ef-b43f-00e18ce201d5', 'Hajime', NULL, 'Isayama', NULL);
 
 -- --------------------------------------------------------
 
@@ -46,8 +53,21 @@ CREATE TABLE `books` (
   `isbn` varchar(20) NOT NULL,
   `title` varchar(255) NOT NULL,
   `category` enum('fictional','non-fictional','academic') NOT NULL,
-  `author_id` char(36) NOT NULL
+  `author_id` char(36) NOT NULL,
+  `image_url` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `books`
+--
+
+INSERT INTO `books` (`id`, `isbn`, `title`, `category`, `author_id`, `image_url`) VALUES
+(1, '1111111111111', 'Attack on Titan', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
+(2, '2222222222', 'Book Test', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
+(3, '3333333333333', 'Hello World', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
+(4, '4444444444444', 'Goodbye World', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
+(5, '5555555555555', 'Frieren: Beyond Journey\'s End', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL),
+(6, '6667877843', 'Hello World Goodbye', 'fictional', '88503003-2212-11ef-b43f-00e18ce201d5', NULL);
 
 -- --------------------------------------------------------
 
@@ -57,12 +77,20 @@ CREATE TABLE `books` (
 
 CREATE TABLE `book_borrows` (
   `id` int(11) NOT NULL,
-  `borrowed_at` date NOT NULL DEFAULT current_date(),
+  `borrowed_at` date NOT NULL DEFAULT curdate(),
   `due_date` date NOT NULL,
   `returned_at` date DEFAULT NULL,
   `book_id` int(11) NOT NULL,
   `user_id` char(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `book_borrows`
+--
+
+INSERT INTO `book_borrows` (`id`, `borrowed_at`, `due_date`, `returned_at`, `book_id`, `user_id`) VALUES
+(1, '2024-06-04', '2024-06-07', NULL, 1, 'df228bed-21af-11ef-b516-00e18ce201d5'),
+(2, '2024-06-04', '2024-06-07', NULL, 5, 'df228bed-21af-11ef-b516-00e18ce201d5');
 
 -- --------------------------------------------------------
 
@@ -112,6 +140,16 @@ CREATE TABLE `sections` (
   `level` enum('elementary','junior-high-school','senior-high-school','college') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `sections`
+--
+
+INSERT INTO `sections` (`id`, `name`, `level`) VALUES
+('acsad', 'ACSAD', 'college'),
+('bcsad', 'BCSAD', 'college'),
+('ccsad', 'CCSAD', 'college'),
+('dcsad', 'DCSAD', 'college');
+
 -- --------------------------------------------------------
 
 --
@@ -124,6 +162,16 @@ CREATE TABLE `section_levels` (
   `year_level_id` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `section_levels`
+--
+
+INSERT INTO `section_levels` (`id`, `section_id`, `year_level_id`) VALUES
+('c1-acsad', 'acsad', 'c1'),
+('c1-bcsad', 'bcsad', 'c1'),
+('c1-ccsad', 'ccsad', 'c1'),
+('c1-dcsad', 'dcsad', 'c1');
+
 -- --------------------------------------------------------
 
 --
@@ -135,6 +183,14 @@ CREATE TABLE `students` (
   `section_level_id` varchar(100) NOT NULL,
   `user_id` char(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`id`, `section_level_id`, `user_id`) VALUES
+('a12345600', 'c1-bcsad', 'c07ac68f-21ad-11ef-b516-00e18ce201d5'),
+('a12345601', 'c1-bcsad', 'df228bed-21af-11ef-b516-00e18ce201d5');
 
 -- --------------------------------------------------------
 
@@ -155,15 +211,27 @@ CREATE TABLE `teachers` (
 --
 
 CREATE TABLE `users` (
-  `id` char(36) NOT NULL,
+  `id` char(36) NOT NULL DEFAULT uuid(),
   `first_name` varchar(255) NOT NULL,
   `middle_name` varchar(255) DEFAULT NULL,
   `last_name` varchar(255) NOT NULL,
   `suffix_name` varchar(255) DEFAULT NULL,
   `role` enum('student','teacher','admin') NOT NULL,
   `password` text NOT NULL,
-  `avatar_url` text DEFAULT NULL
+  `avatar_url` text DEFAULT NULL,
+  `email` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `role`, `password`, `avatar_url`, `email`) VALUES
+('02b07017-21a7-11ef-b516-00e18ce201d5', 'Aaron', NULL, 'Melendres', NULL, 'student', 'password', NULL, 'aaron@gmail.com'),
+('1d363d3d-21a9-11ef-b516-00e18ce201d5', 'Lorena', NULL, 'Sanchez', NULL, 'student', 'password', NULL, 'lorena@gmail.com'),
+('372ae01a-21a1-11ef-b516-00e18ce201d5', 'Admin', NULL, 'User', NULL, 'admin', 'password', NULL, 'admin@gmail.com'),
+('c07ac68f-21ad-11ef-b516-00e18ce201d5', 'Samantha', NULL, 'Oris', NULL, 'student', 'password', NULL, 'samantha@gmail.com'),
+('df228bed-21af-11ef-b516-00e18ce201d5', 'Giordan', NULL, 'Nuez', NULL, 'student', 'password', NULL, 'gior@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -175,6 +243,27 @@ CREATE TABLE `year_levels` (
   `id` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `year_levels`
+--
+
+INSERT INTO `year_levels` (`id`, `name`) VALUES
+('c1', 'First Year College'),
+('c2', 'Second Year College'),
+('c3', 'Third Year College'),
+('c4', 'Fourth Year College'),
+('g1', 'Grade 1'),
+('g10', 'Grade 10'),
+('g11', 'Grade 11'),
+('g2', 'Grade 2'),
+('g3', 'Grade 3'),
+('g4', 'Grade 4'),
+('g5', 'Grade 5'),
+('g6', 'Grade 6'),
+('g7', 'Grade 7'),
+('g8', 'Grade 8'),
+('g9', 'Grade 9');
 
 --
 -- Indexes for dumped tables
@@ -256,7 +345,8 @@ ALTER TABLE `teachers`
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `year_levels`
@@ -272,13 +362,13 @@ ALTER TABLE `year_levels`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `book_borrows`
 --
 ALTER TABLE `book_borrows`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `book_penalties`

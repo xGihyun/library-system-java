@@ -41,11 +41,33 @@ CREATE TABLE IF NOT EXISTS year_levels (
   name VARCHAR(255) NOT NULL 
 );
 
+INSERT INTO year_levels (id, name)
+VALUES
+    ('g1', 'Grade 1'),
+    ('g2', 'Grade 2'),
+    ('g3', 'Grade 3'),
+    ('g4', 'Grade 4'),
+    ('g5', 'Grade 5'),
+    ('g6', 'Grade 6'),
+    ('g7', 'Grade 7'),
+    ('g8', 'Grade 8'),
+    ('g9', 'Grade 9'),
+    ('g10', 'Grade 10'),
+    ('g11', 'Grade 11'),
+    ('c1', 'First Year College'),
+    ('c2', 'Second Year College'),
+    ('c3', 'Third Year College'),
+    ('c4', 'Fourth Year College');
+
 CREATE TABLE IF NOT EXISTS sections (
   id VARCHAR(50) PRIMARY KEY, -- "acsad", "bcsad", "ccsad"
   name VARCHAR(255) NOT NULL, -- "ACSAD", "BCSAD", "CCSAD"
   level ENUM('elementary', 'junior-high-school', 'senior-high-school', 'college') NOT NULL
 );
+
+INSERT INSERT INTO sections (
+  id, name, level
+) VALUES ( "acsad", "ACSAD", "college" ), ("bcsad", "BCSAD", "college"), ("ccsad", "CCSAD", "college"), ("dcsad", "DCSAD", "college")
 
 -- List of sections with their corresponding year level
 CREATE TABLE IF NOT EXISTS section_levels (
@@ -60,6 +82,9 @@ CREATE TABLE IF NOT EXISTS section_levels (
   FOREIGN KEY(year_level_id) REFERENCES year_levels(id) ON DELETE CASCADE
 );
 
+INSERT INTO section_levels (id, section_id, year_level_id) 
+VALUES ("c1-acsad", "acsad", "c1"), ("c1-bcsad", "bcsad", "c1"), ("c1-ccsad", "ccsad", "c1"), ("c1-dcsad", "dcsad", "c1")
+
 CREATE TABLE IF NOT EXISTS students (
   id VARCHAR(100) PRIMARY KEY, -- Use student no.
 
@@ -71,6 +96,10 @@ CREATE TABLE IF NOT EXISTS students (
   FOREIGN KEY(section_level_id) REFERENCES section_levels(id) ON DELETE CASCADE,
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+INSERT INTO students (id, section_level_id, user_id)
+VALUES ("a12345601", "c1-bcsad", "df228bed-21af-11ef-b516-00e18ce201d5"),
+("a12345600", "c1-bcsad", "c07ac68f-21ad-11ef-b516-00e18ce201d5");
 
 CREATE TABLE IF NOT EXISTS authors (
   id CHAR(36) PRIMARY KEY DEFAULT uuid(), -- UUID()

@@ -14,7 +14,8 @@ public class Database {
   public Database(String db, String username, String password, String dbName) throws Exception {
     try {
       // Load the JDBC driver
-      Class.forName("org.mariadb.jdbc.Driver");
+      // Class.forName("org.mariadb.jdbc.Driver");
+      // Class.forName("com.mysql.cj.jdbc.Driver");
 
       this.username = username;
       this.password = password;

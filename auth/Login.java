@@ -1,6 +1,8 @@
 package auth;
 
 import assets.Colors;
+import entities.Session;
+import entities.User;
 import admin.BookList;
 import javax.swing.*;
 import java.awt.*;
@@ -86,13 +88,16 @@ public class Login extends JFrame {
           String password = new String(passwordText.getPassword());
 
           try {
-            boolean isAuthenticated = authenticateUser(conn, email, password);
+            User user = authenticateUser(conn, email, password);
 
-            if (isAuthenticated) {
+            if (user != null) {
               JOptionPane.showMessageDialog(Login.this, "Login successful");
 
               dispose();
-              new BookList();
+
+              Session.getInstance().setUser(user);
+
+              new BookList(conn);
             } else {
               JOptionPane.showMessageDialog(Login.this, "Invalid email or password");
             }
@@ -120,7 +125,7 @@ public class Login extends JFrame {
       registerButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          dispose(); 
+          dispose();
           new Register(conn);
         }
       });
@@ -139,17 +144,33 @@ public class Login extends JFrame {
     });
   }
 
-  private boolean authenticateUser(Connection connection, String email, String password) {
+  private User authenticateUser(Connection connection, String email, String password) {
     String query = "SELECT * FROM users WHERE email = ? AND password = ?";
-    try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-      preparedStatement.setString(1, email);
-      preparedStatement.setString(2, password);
-      ResultSet resultSet = preparedStatement.executeQuery();
 
-      return resultSet.next(); // User found
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+      stmt.setString(1, email);
+      stmt.setString(2, password);
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (rs.next()) {
+        String id = rs.getString("id");
+        String firstName = rs.getString("first_name");
+        String middleName = rs.getString("middle_name");
+        String lastName = rs.getString("last_name");
+        String suffixName = rs.getString("suffix_name");
+        String role = rs.getString("role");
+        String avatarUrl = rs.getString("avatar_url");
+        String userEmail = rs.getString("email");
+
+        User user = new User(id, firstName, middleName, lastName, suffixName, role, avatarUrl, email)
+
+        return user;
+      }
     } catch (SQLException e) {
       e.printStackTrace();
-      return false;
     }
+
+    return null;
   }
 }
