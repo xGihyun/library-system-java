@@ -40,6 +40,7 @@ public class Login extends JFrame {
       gbc.insets = new Insets(10, 10, 10, 10);
 
       Font font = new Font("Arial", Font.PLAIN, 18);
+      Font fontBold = new Font("Arial", Font.BOLD, 18);
 
       JLabel emailLabel = new JLabel("Email:");
       emailLabel.setFont(font);
@@ -72,7 +73,7 @@ public class Login extends JFrame {
       loginPanel.add(passwordText, gbc);
 
       JButton loginButton = new JButton("Login");
-      loginButton.setFont(font);
+      loginButton.setFont(fontBold);
       loginButton.setBackground(Colors.BLUE);
       loginButton.setForeground(Colors.BASE);
       loginButton.setFocusPainted(false);
@@ -111,7 +112,7 @@ public class Login extends JFrame {
       // Add this after the login button creation in the Login class
 
       // Create the register button with modern look
-      JButton registerButton = new JButton("<html>Don't have an account? <u>Register</u></html>");
+      JButton registerButton = new JButton("<html>Don't have an account? <u><b>Register</b></u></html>");
       registerButton.setFont(font);
       registerButton.setBackground(Colors.PEACH);
       registerButton.setForeground(Colors.BASE);

@@ -3,6 +3,7 @@ package admin;
 import assets.Colors;
 import entities.*;
 import views.Sidebar;
+import views.TopPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -33,6 +34,43 @@ public class BookList extends JFrame {
     SwingUtilities.invokeLater(this::createAndShowBookList);
   }
 
+  // private JPanel createUserInfoPanel() {
+  //   JPanel userInfoPanel = new JPanel(new BorderLayout());
+  //   userInfoPanel.setBackground(Colors.BASE);
+  //   userInfoPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+  //
+  //   // User name label
+  //   JLabel userNameLabel = new JLabel(user.getFullName());
+  //   userNameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+  //   userNameLabel.setForeground(Colors.TEXT);
+  //
+  //   // User avatar
+  //   JLabel userAvatarLabel = new JLabel();
+  //   ImageIcon avatarIcon;
+  //
+  //   if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+  //     avatarIcon = new ImageIcon(getClass().getResource("../assets/images/avatars/" + user.getAvatarUrl()));
+  //   } else {
+  //     avatarIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
+  //   }
+  //
+  //   Image img = avatarIcon.getImage();
+  //   Image resizedImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+  //   avatarIcon = new ImageIcon(resizedImg);
+  //
+  //   userAvatarLabel.setIcon(avatarIcon);
+  //
+  //   // Adding components to the panel
+  //   JPanel userDetailPanel = new JPanel();
+  //   userDetailPanel.setBackground(Colors.BASE);
+  //   userDetailPanel.add(userNameLabel);
+  //   userDetailPanel.add(userAvatarLabel);
+  //
+  //   userInfoPanel.add(userDetailPanel, BorderLayout.EAST);
+  //
+  //   return userInfoPanel;
+  // }
+
   private void createAndShowBookList() {
     setTitle("Book List");
     setSize(1280, 768);
@@ -41,6 +79,10 @@ public class BookList extends JFrame {
     setLocationRelativeTo(null);
 
     add(new Sidebar(conn, this), BorderLayout.WEST);
+
+    TopPanel foo = new TopPanel();
+    // JPanel userInfoPanel = createUserInfoPanel();
+    add(foo.createTopPanel(), BorderLayout.NORTH);
 
     // Title Label
     // JLabel titleLabel = new JLabel("Book List");
@@ -154,7 +196,7 @@ public class BookList extends JFrame {
 
   private JPanel createBookCard(Book book) {
     JPanel card = new JPanel(new BorderLayout());
-    card.setPreferredSize(new Dimension(300, 400));
+    card.setPreferredSize(new Dimension(300, 600));
     card.setBorder(BorderFactory.createLineBorder(Colors.OVERLAY1, 2));
     card.setBackground(Colors.MANTLE);
 
@@ -173,7 +215,7 @@ public class BookList extends JFrame {
     imageIcon = new ImageIcon(resizedImg);
 
     imageLabel.setIcon(imageIcon);
-    card.add(imageLabel, BorderLayout.CENTER);
+    card.add(imageLabel, BorderLayout.NORTH);
 
     // Book Details
     JPanel detailsPanel = new JPanel(new GridLayout(0, 1));
@@ -201,7 +243,7 @@ public class BookList extends JFrame {
       }
     }
 
-    card.add(detailsPanel, BorderLayout.SOUTH);
+    card.add(detailsPanel, BorderLayout.CENTER);
 
     Font font = new Font("Arial", Font.PLAIN, 18);
 
@@ -227,6 +269,21 @@ public class BookList extends JFrame {
 
     if (!book.getCategory().equalsIgnoreCase("academic")) {
       detailsPanel.add(selectCheckBox);
+
+      card.addMouseListener(new java.awt.event.MouseAdapter() {
+        @Override
+        public void mouseClicked(java.awt.event.MouseEvent e) {
+          if (!book.isBorrowed()) {
+            selectCheckBox.setSelected(!selectCheckBox.isSelected());
+            if (selectCheckBox.isSelected()) {
+              selectedBooks.add(book);
+            } else {
+              selectedBooks.remove(book);
+            }
+            borrowButton.setVisible(!selectedBooks.isEmpty());
+          }
+        }
+      });
     } else {
       JPanel ghostElement = new JPanel();
       ghostElement.setPreferredSize(selectCheckboxDimension);

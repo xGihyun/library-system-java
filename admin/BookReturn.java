@@ -154,7 +154,7 @@ public class BookReturn extends JFrame {
 
   private JPanel createBorrowedBookCard(BorrowedBook book) {
     JPanel card = new JPanel(new BorderLayout());
-    card.setPreferredSize(new Dimension(300, 400));
+    card.setPreferredSize(new Dimension(300, 600)); 
     card.setBorder(BorderFactory.createLineBorder(Colors.OVERLAY1, 2));
     card.setBackground(Colors.MANTLE);
 
@@ -185,7 +185,6 @@ public class BookReturn extends JFrame {
     detailsPanel.add(createDetailLabel("Borrowed At: " + book.getBorrowedAt().toString()));
 
     if (user.getRole().equalsIgnoreCase("student")) {
-
       detailsPanel.add(createDetailLabel("Due Date: " + book.getDueDate().toString()));
       detailsPanel.add(createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount()));
     }
@@ -217,6 +216,21 @@ public class BookReturn extends JFrame {
       returnButton.setVisible(!selectedBooks.isEmpty());
     });
     detailsPanel.add(selectCheckBox);
+
+    card.addMouseListener(new java.awt.event.MouseAdapter() {
+      @Override
+      public void mouseClicked(java.awt.event.MouseEvent e) {
+        if (!book.isBorrowed()) {
+          selectCheckBox.setSelected(!selectCheckBox.isSelected());
+          if (selectCheckBox.isSelected()) {
+            selectedBooks.add(book);
+          } else {
+            selectedBooks.remove(book);
+          }
+          returnButton.setVisible(!selectedBooks.isEmpty());
+        }
+      }
+    });
 
     return card;
   }

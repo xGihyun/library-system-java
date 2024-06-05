@@ -75,4 +75,9 @@ public class User {
   public String getEmail() {
     return email;
   }
+
+  public String getFullName() {
+    return firstName + (middleName != null && !middleName.isEmpty() ? " " + middleName : "") + " " + lastName
+        + (suffixName != null && !suffixName.isEmpty() ? " " + suffixName : "");
+  }
 }

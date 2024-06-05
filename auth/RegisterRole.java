@@ -31,9 +31,18 @@ public class RegisterRole extends JFrame {
 
     JPanel imagePanel = new JPanel();
     imagePanel.setBackground(Colors.BASE);
-    add(imagePanel);
+    imagePanel.setLayout(new GridBagLayout()); 
 
     JLabel imageLabel = new JLabel();
+    ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/logoForLogin.png"));
+    imageLabel.setIcon(imageIcon);
+    imageLabel.setHorizontalAlignment(JLabel.CENTER); 
+    imageLabel.setVerticalAlignment(JLabel.CENTER); 
+    imagePanel.add(imageLabel, new GridBagConstraints()); 
+
+    add(imagePanel);
+
+    // JLabel imageLabel = new JLabel();
     // ImageIcon imageIcon = new
     // ImageIcon(this.getClass().getResource("../assets/images/bocchi.jpg"));
     // imageLabel.setIcon(imageIcon);
