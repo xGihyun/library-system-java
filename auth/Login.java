@@ -139,9 +139,9 @@ public class Login extends JFrame {
       JLabel imageLabel = new JLabel();
       ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/logoForLogin.png"));
       imageLabel.setIcon(imageIcon);
-      imageLabel.setHorizontalAlignment(JLabel.CENTER); // Center the image horizontally
-      imageLabel.setVerticalAlignment(JLabel.CENTER); // Center the image vertically
-      imagePanel.add(imageLabel, new GridBagConstraints()); // Add the image label to the panel
+      imageLabel.setHorizontalAlignment(JLabel.CENTER); 
+      imageLabel.setVerticalAlignment(JLabel.CENTER);
+      imagePanel.add(imageLabel, new GridBagConstraints()); 
 
       setVisible(true);
     });

@@ -42,12 +42,19 @@ public class Register extends JFrame {
     Font font = new Font("Arial", Font.PLAIN, 18);
 
     // Create labels and text fields for user information
-    JLabel firstNameLabel = new JLabel("First Name:");
+    JLabel firstNameLabel = new JLabel("* First Name:");
     firstNameLabel.setFont(font);
     firstNameLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
     gbc.gridy = 0;
     registrationPanel.add(firstNameLabel, gbc);
+
+    JLabel middleNameLabel = new JLabel("Middle Name:");
+    middleNameLabel.setFont(font);
+    middleNameLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    registrationPanel.add(middleNameLabel, gbc);
 
     JTextField firstNameText = new JTextField(20);
     firstNameText.setFont(font);
@@ -57,12 +64,19 @@ public class Register extends JFrame {
     gbc.gridy = 0;
     registrationPanel.add(firstNameText, gbc);
 
-    JLabel lastNameLabel = new JLabel("Last Name:");
+    JLabel lastNameLabel = new JLabel("* Last Name:");
     lastNameLabel.setFont(font);
     lastNameLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
     gbc.gridy = 1;
     registrationPanel.add(lastNameLabel, gbc);
+
+    JLabel suffixNameLabel = new JLabel("Suffix Name:");
+    suffixNameLabel.setFont(font);
+    suffixNameLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    registrationPanel.add(suffixNameLabel, gbc);
 
     JTextField lastNameText = new JTextField(20);
     lastNameText.setFont(font);
@@ -72,7 +86,7 @@ public class Register extends JFrame {
     gbc.gridy = 1;
     registrationPanel.add(lastNameText, gbc);
 
-    JLabel emailLabel = new JLabel("Email:");
+    JLabel emailLabel = new JLabel("* Email:");
     emailLabel.setFont(font);
     emailLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
@@ -87,7 +101,7 @@ public class Register extends JFrame {
     gbc.gridy = 2;
     registrationPanel.add(emailText, gbc);
 
-    JLabel passwordLabel = new JLabel("Password:");
+    JLabel passwordLabel = new JLabel("* Password:");
     passwordLabel.setFont(font);
     passwordLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;

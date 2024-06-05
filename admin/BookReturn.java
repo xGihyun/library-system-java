@@ -186,7 +186,14 @@ public class BookReturn extends JFrame {
 
     if (user.getRole().equalsIgnoreCase("student")) {
       detailsPanel.add(createDetailLabel("Due Date: " + book.getDueDate().toString()));
-      detailsPanel.add(createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount()));
+
+      JLabel penaltyLabel = createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount());
+
+      if(book.getPenaltyAmount() > 0) {
+        penaltyLabel = createDetailLabel("Penalty Amount: Php. " + book.getPenaltyAmount(), Colors.RED);
+      }
+
+      detailsPanel.add(penaltyLabel);
     }
 
     card.add(detailsPanel, BorderLayout.SOUTH);

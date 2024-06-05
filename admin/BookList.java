@@ -35,40 +35,42 @@ public class BookList extends JFrame {
   }
 
   // private JPanel createUserInfoPanel() {
-  //   JPanel userInfoPanel = new JPanel(new BorderLayout());
-  //   userInfoPanel.setBackground(Colors.BASE);
-  //   userInfoPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+  // JPanel userInfoPanel = new JPanel(new BorderLayout());
+  // userInfoPanel.setBackground(Colors.BASE);
+  // userInfoPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
   //
-  //   // User name label
-  //   JLabel userNameLabel = new JLabel(user.getFullName());
-  //   userNameLabel.setFont(new Font("Arial", Font.BOLD, 16));
-  //   userNameLabel.setForeground(Colors.TEXT);
+  // // User name label
+  // JLabel userNameLabel = new JLabel(user.getFullName());
+  // userNameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+  // userNameLabel.setForeground(Colors.TEXT);
   //
-  //   // User avatar
-  //   JLabel userAvatarLabel = new JLabel();
-  //   ImageIcon avatarIcon;
+  // // User avatar
+  // JLabel userAvatarLabel = new JLabel();
+  // ImageIcon avatarIcon;
   //
-  //   if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-  //     avatarIcon = new ImageIcon(getClass().getResource("../assets/images/avatars/" + user.getAvatarUrl()));
-  //   } else {
-  //     avatarIcon = new ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
-  //   }
+  // if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+  // avatarIcon = new ImageIcon(getClass().getResource("../assets/images/avatars/"
+  // + user.getAvatarUrl()));
+  // } else {
+  // avatarIcon = new
+  // ImageIcon(getClass().getResource("../assets/images/bocchi.jpg"));
+  // }
   //
-  //   Image img = avatarIcon.getImage();
-  //   Image resizedImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-  //   avatarIcon = new ImageIcon(resizedImg);
+  // Image img = avatarIcon.getImage();
+  // Image resizedImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+  // avatarIcon = new ImageIcon(resizedImg);
   //
-  //   userAvatarLabel.setIcon(avatarIcon);
+  // userAvatarLabel.setIcon(avatarIcon);
   //
-  //   // Adding components to the panel
-  //   JPanel userDetailPanel = new JPanel();
-  //   userDetailPanel.setBackground(Colors.BASE);
-  //   userDetailPanel.add(userNameLabel);
-  //   userDetailPanel.add(userAvatarLabel);
+  // // Adding components to the panel
+  // JPanel userDetailPanel = new JPanel();
+  // userDetailPanel.setBackground(Colors.BASE);
+  // userDetailPanel.add(userNameLabel);
+  // userDetailPanel.add(userAvatarLabel);
   //
-  //   userInfoPanel.add(userDetailPanel, BorderLayout.EAST);
+  // userInfoPanel.add(userDetailPanel, BorderLayout.EAST);
   //
-  //   return userInfoPanel;
+  // return userInfoPanel;
   // }
 
   private void createAndShowBookList() {
@@ -140,6 +142,27 @@ public class BookList extends JFrame {
     add(borrowButton, BorderLayout.SOUTH);
 
     setVisible(true);
+  }
+
+  private boolean checkPenalty() {
+    String query = "SELECT EXISTS ("
+        + " SELECT 1 "
+        + " FROM book_borrows "
+        + " WHERE user_id = ? "
+        + "  AND due_date < CURDATE() "
+        + "  AND returned_at IS NULL"
+        + " ) AS has_penalty";
+
+    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+      preparedStatement.setString(1, user.getId());
+      ResultSet resultSet = preparedStatement.executeQuery();
+      if (resultSet.next()) {
+        return resultSet.getInt("has_penalty") == 1;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return false;
   }
 
   private List<Book> fetchBooksFromDatabase() {
@@ -401,6 +424,13 @@ public class BookList extends JFrame {
 
     if (selectedBooks.size() > maxBorrowedBooksCount) {
       JOptionPane.showMessageDialog(this, "Sorry! You have exceeded the number of books to be borrowed.");
+      return;
+    }
+
+    boolean hasPenalty = checkPenalty();
+
+    if (hasPenalty) {
+      JOptionPane.showMessageDialog(this, "Sorry! Please pay your unpaid penalty first.");
       return;
     }
 

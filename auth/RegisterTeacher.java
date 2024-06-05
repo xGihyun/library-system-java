@@ -55,7 +55,7 @@ public class RegisterTeacher extends JFrame {
     Font font = new Font("Arial", Font.PLAIN, 18);
 
     // Create labels and text fields for user information
-    JLabel firstNameLabel = new JLabel("First Name:");
+    JLabel firstNameLabel = new JLabel("* First Name:");
     firstNameLabel.setFont(font);
     firstNameLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
@@ -70,11 +70,26 @@ public class RegisterTeacher extends JFrame {
     gbc.gridy = 0;
     registrationPanel.add(firstNameText, gbc);
 
-    JLabel lastNameLabel = new JLabel("Last Name:");
+    JLabel middleNameLabel = new JLabel("Middle Name:");
+    middleNameLabel.setFont(font);
+    middleNameLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    registrationPanel.add(middleNameLabel, gbc);
+
+    JTextField middleNameText = new JTextField(20);
+    middleNameText.setFont(font);
+    middleNameText.setBackground(Colors.MANTLE);
+    middleNameText.setForeground(Colors.TEXT);
+    gbc.gridx = 1;
+    gbc.gridy = 1;
+    registrationPanel.add(middleNameText, gbc);
+
+    JLabel lastNameLabel = new JLabel("* Last Name:");
     lastNameLabel.setFont(font);
     lastNameLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 1;
+    gbc.gridy = 2;
     registrationPanel.add(lastNameLabel, gbc);
 
     JTextField lastNameText = new JTextField(20);
@@ -82,14 +97,29 @@ public class RegisterTeacher extends JFrame {
     lastNameText.setBackground(Colors.MANTLE);
     lastNameText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 1;
+    gbc.gridy = 2;
     registrationPanel.add(lastNameText, gbc);
 
-    JLabel emailLabel = new JLabel("Email:");
+    JLabel suffixNameLabel = new JLabel("Suffix Name:");
+    suffixNameLabel.setFont(font);
+    suffixNameLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    registrationPanel.add(suffixNameLabel, gbc);
+
+    JTextField suffixNameText = new JTextField(20);
+    suffixNameText.setFont(font);
+    suffixNameText.setBackground(Colors.MANTLE);
+    suffixNameText.setForeground(Colors.TEXT);
+    gbc.gridx = 1;
+    gbc.gridy = 3;
+    registrationPanel.add(suffixNameText, gbc);
+
+    JLabel emailLabel = new JLabel("* Email:");
     emailLabel.setFont(font);
     emailLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 2;
+    gbc.gridy = 4;
     registrationPanel.add(emailLabel, gbc);
 
     JTextField emailText = new JTextField(20);
@@ -97,14 +127,14 @@ public class RegisterTeacher extends JFrame {
     emailText.setBackground(Colors.MANTLE);
     emailText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 2;
+    gbc.gridy = 4;
     registrationPanel.add(emailText, gbc);
 
-    JLabel passwordLabel = new JLabel("Password:");
+    JLabel passwordLabel = new JLabel("* Password:");
     passwordLabel.setFont(font);
     passwordLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 3;
+    gbc.gridy = 5;
     registrationPanel.add(passwordLabel, gbc);
 
     JPasswordField passwordText = new JPasswordField(20);
@@ -112,14 +142,14 @@ public class RegisterTeacher extends JFrame {
     passwordText.setBackground(Colors.MANTLE);
     passwordText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 3;
+    gbc.gridy = 5;
     registrationPanel.add(passwordText, gbc);
 
-    JLabel employeeIdLabel = new JLabel("Employee ID:");
+    JLabel employeeIdLabel = new JLabel("* Employee ID:");
     employeeIdLabel.setFont(font);
     employeeIdLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 4;
+    gbc.gridy = 6;
     registrationPanel.add(employeeIdLabel, gbc);
 
     JTextField employeeIdText = new JTextField(20);
@@ -127,14 +157,14 @@ public class RegisterTeacher extends JFrame {
     employeeIdText.setBackground(Colors.MANTLE);
     employeeIdText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 4;
+    gbc.gridy = 6;
     registrationPanel.add(employeeIdText, gbc);
 
-    JLabel departmentLabel = new JLabel("Department:");
+    JLabel departmentLabel = new JLabel("* Department:");
     departmentLabel.setFont(font);
     departmentLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 5;
+    gbc.gridy = 7;
     registrationPanel.add(departmentLabel, gbc);
 
     JComboBox<Department> departmentComboBox = new JComboBox<>();
@@ -147,7 +177,7 @@ public class RegisterTeacher extends JFrame {
     }
 
     gbc.gridx = 1;
-    gbc.gridy = 5;
+    gbc.gridy = 7;
     registrationPanel.add(departmentComboBox, gbc);
 
     JButton registerButton = new JButton("Register");
@@ -157,21 +187,23 @@ public class RegisterTeacher extends JFrame {
     registerButton.setFocusPainted(false);
     registerButton.setBorderPainted(false);
     gbc.gridx = 1;
-    gbc.gridy = 6;
+    gbc.gridy = 8;
     registrationPanel.add(registerButton, gbc);
 
     registerButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         String firstName = firstNameText.getText();
+        String middleName = middleNameText.getText();
         String lastName = lastNameText.getText();
+        String suffixName = suffixNameText.getText();
         String email = emailText.getText();
         String password = new String(passwordText.getPassword());
         String employeeId = employeeIdText.getText();
         Department department = (Department) departmentComboBox.getSelectedItem();
 
         try {
-          String userId = registerUser(conn, firstName, lastName, email, password);
+          String userId = registerUser(conn, firstName, middleName, lastName, suffixName, email, password);
           if (userId != null) {
             boolean result = registerTeacher(conn, userId, employeeId, department);
             if (result) {
@@ -198,7 +230,7 @@ public class RegisterTeacher extends JFrame {
     loginButton.setFocusPainted(false);
     loginButton.setBorderPainted(false);
     gbc.gridx = 1;
-    gbc.gridy = 8;
+    gbc.gridy = 9;
     registrationPanel.add(loginButton, gbc);
 
     loginButton.addActionListener(new ActionListener() {
@@ -209,29 +241,36 @@ public class RegisterTeacher extends JFrame {
       }
     });
 
+    // Right panel for the image
     JPanel imagePanel = new JPanel();
-    imagePanel.setBackground(Colors.OVERLAY1);
+    imagePanel.setBackground(Colors.BASE);
+    imagePanel.setLayout(new GridBagLayout()); // Add this line to use GridBagLayout
     add(imagePanel);
 
     JLabel imageLabel = new JLabel();
-    ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/bocchi.jpg"));
+    ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/logoForLogin.png"));
     imageLabel.setIcon(imageIcon);
-    imagePanel.add(imageLabel);
+    imageLabel.setHorizontalAlignment(JLabel.CENTER);
+    imageLabel.setVerticalAlignment(JLabel.CENTER);
+    imagePanel.add(imageLabel, new GridBagConstraints());
 
     setVisible(true);
   }
 
-  private String registerUser(Connection connection, String firstName, String lastName, String email, String password) {
+  private String registerUser(Connection connection, String firstName,String middleName, String lastName,String suffixName, String email, String password) {
     String userId = UUID.randomUUID().toString();
-    String query = "INSERT INTO users (id, first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?, 'teacher')";
+    String query = "INSERT INTO users (id, first_name, middle_name, last_name, suffix_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?, 'teacher')";
 
     try (PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setString(1, userId);
       stmt.setString(2, firstName);
-      stmt.setString(3, lastName);
-      stmt.setString(4, email);
-      stmt.setString(5, password);
+      stmt.setString(3, middleName);
+      stmt.setString(4, lastName);
+      stmt.setString(5, suffixName);
+      stmt.setString(6, email);
+      stmt.setString(7, password);
       stmt.executeUpdate();
+
       return userId;
     } catch (SQLException e) {
       e.printStackTrace();

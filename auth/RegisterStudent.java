@@ -85,7 +85,7 @@ public class RegisterStudent extends JFrame {
     Font font = new Font("Arial", Font.PLAIN, 18);
 
     // Create labels and text fields for user information
-    JLabel firstNameLabel = new JLabel("First Name:");
+    JLabel firstNameLabel = new JLabel("* First Name:");
     firstNameLabel.setFont(font);
     firstNameLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
@@ -100,11 +100,26 @@ public class RegisterStudent extends JFrame {
     gbc.gridy = 0;
     registrationPanel.add(firstNameText, gbc);
 
-    JLabel lastNameLabel = new JLabel("Last Name:");
+    JLabel middleNameLabel = new JLabel("Middle Name:");
+    middleNameLabel.setFont(font);
+    middleNameLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    registrationPanel.add(middleNameLabel, gbc);
+
+    JTextField middleNameText = new JTextField(20);
+    middleNameText.setFont(font);
+    middleNameText.setBackground(Colors.MANTLE);
+    middleNameText.setForeground(Colors.TEXT);
+    gbc.gridx = 1;
+    gbc.gridy = 1;
+    registrationPanel.add(middleNameText, gbc);
+
+    JLabel lastNameLabel = new JLabel("* Last Name:");
     lastNameLabel.setFont(font);
     lastNameLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 1;
+    gbc.gridy = 2;
     registrationPanel.add(lastNameLabel, gbc);
 
     JTextField lastNameText = new JTextField(20);
@@ -112,14 +127,29 @@ public class RegisterStudent extends JFrame {
     lastNameText.setBackground(Colors.MANTLE);
     lastNameText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 1;
+    gbc.gridy = 2;
     registrationPanel.add(lastNameText, gbc);
 
-    JLabel emailLabel = new JLabel("Email:");
+    JLabel suffixNameLabel = new JLabel("Suffix Name:");
+    suffixNameLabel.setFont(font);
+    suffixNameLabel.setForeground(Colors.TEXT);
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    registrationPanel.add(suffixNameLabel, gbc);
+
+    JTextField suffixNameText = new JTextField(20);
+    suffixNameText.setFont(font);
+    suffixNameText.setBackground(Colors.MANTLE);
+    suffixNameText.setForeground(Colors.TEXT);
+    gbc.gridx = 1;
+    gbc.gridy = 3;
+    registrationPanel.add(suffixNameText, gbc);
+
+    JLabel emailLabel = new JLabel("* Email:");
     emailLabel.setFont(font);
     emailLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 2;
+    gbc.gridy = 4;
     registrationPanel.add(emailLabel, gbc);
 
     JTextField emailText = new JTextField(20);
@@ -127,14 +157,14 @@ public class RegisterStudent extends JFrame {
     emailText.setBackground(Colors.MANTLE);
     emailText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 2;
+    gbc.gridy = 4;
     registrationPanel.add(emailText, gbc);
 
-    JLabel passwordLabel = new JLabel("Password:");
+    JLabel passwordLabel = new JLabel("* Password:");
     passwordLabel.setFont(font);
     passwordLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 3;
+    gbc.gridy = 5;
     registrationPanel.add(passwordLabel, gbc);
 
     JPasswordField passwordText = new JPasswordField(20);
@@ -142,14 +172,14 @@ public class RegisterStudent extends JFrame {
     passwordText.setBackground(Colors.MANTLE);
     passwordText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 3;
+    gbc.gridy = 5;
     registrationPanel.add(passwordText, gbc);
 
-    JLabel studentIdLabel = new JLabel("Student ID:");
+    JLabel studentIdLabel = new JLabel("* Student ID:");
     studentIdLabel.setFont(font);
     studentIdLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 4;
+    gbc.gridy = 6;
     registrationPanel.add(studentIdLabel, gbc);
 
     JTextField studentIdText = new JTextField(20);
@@ -157,14 +187,14 @@ public class RegisterStudent extends JFrame {
     studentIdText.setBackground(Colors.MANTLE);
     studentIdText.setForeground(Colors.TEXT);
     gbc.gridx = 1;
-    gbc.gridy = 4;
+    gbc.gridy = 6;
     registrationPanel.add(studentIdText, gbc);
 
-    JLabel yearLevelLabel = new JLabel("Year Level:");
+    JLabel yearLevelLabel = new JLabel("* Year Level:");
     yearLevelLabel.setFont(font);
     yearLevelLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 5;
+    gbc.gridy = 7;
     registrationPanel.add(yearLevelLabel, gbc);
 
     JComboBox<YearLevel> yearLevelComboBox = new JComboBox<>();
@@ -177,14 +207,14 @@ public class RegisterStudent extends JFrame {
     }
 
     gbc.gridx = 1;
-    gbc.gridy = 5;
+    gbc.gridy = 7;
     registrationPanel.add(yearLevelComboBox, gbc);
 
-    JLabel sectionLabel = new JLabel("Section:");
+    JLabel sectionLabel = new JLabel("* Section:");
     sectionLabel.setFont(font);
     sectionLabel.setForeground(Colors.TEXT);
     gbc.gridx = 0;
-    gbc.gridy = 6;
+    gbc.gridy = 8;
     registrationPanel.add(sectionLabel, gbc);
 
     JComboBox<Section> sectionComboBox = new JComboBox<>();
@@ -219,7 +249,7 @@ public class RegisterStudent extends JFrame {
     // }
 
     gbc.gridx = 1;
-    gbc.gridy = 6;
+    gbc.gridy = 8;
     registrationPanel.add(sectionComboBox, gbc);
 
     JButton registerButton = new JButton("Register");
@@ -229,14 +259,16 @@ public class RegisterStudent extends JFrame {
     registerButton.setFocusPainted(false);
     registerButton.setBorderPainted(false);
     gbc.gridx = 1;
-    gbc.gridy = 7;
+    gbc.gridy = 9;
     registrationPanel.add(registerButton, gbc);
 
     registerButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         String firstName = firstNameText.getText();
+        String middleName = middleNameText.getText();
         String lastName = lastNameText.getText();
+        String suffixName = suffixNameText.getText();
         String email = emailText.getText();
         String password = new String(passwordText.getPassword());
         String studentId = studentIdText.getText();
@@ -244,7 +276,7 @@ public class RegisterStudent extends JFrame {
         // YearLevel yearLevel = (YearLevel) yearLevelComboBox.getSelectedItem();
 
         try {
-          String userId = registerUser(conn, firstName, lastName, email, password);
+          String userId = registerUser(conn, firstName, middleName, lastName, suffixName, email, password);
           if (userId != null) {
             boolean result = registerStudent(conn, studentId, userId, section.getSectionLevelId());
             if (result) {
@@ -271,7 +303,7 @@ public class RegisterStudent extends JFrame {
     loginButton.setFocusPainted(false);
     loginButton.setBorderPainted(false);
     gbc.gridx = 1;
-    gbc.gridy = 8;
+    gbc.gridy = 10;
     registrationPanel.add(loginButton, gbc);
 
     loginButton.addActionListener(new ActionListener() {
@@ -283,28 +315,34 @@ public class RegisterStudent extends JFrame {
     });
 
     JPanel imagePanel = new JPanel();
-    imagePanel.setBackground(Colors.OVERLAY1);
+    imagePanel.setBackground(Colors.BASE);
+    imagePanel.setLayout(new GridBagLayout());
     add(imagePanel);
 
     JLabel imageLabel = new JLabel();
-    ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/bocchi.jpg"));
+    ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("../assets/images/logoForLogin.png"));
     imageLabel.setIcon(imageIcon);
-    imagePanel.add(imageLabel);
+    imageLabel.setHorizontalAlignment(JLabel.CENTER);
+    imageLabel.setVerticalAlignment(JLabel.CENTER);
+    imagePanel.add(imageLabel, new GridBagConstraints());
 
     setVisible(true);
   }
 
-  private String registerUser(Connection connection, String firstName, String lastName, String email, String password) {
+  private String registerUser(Connection connection, String firstName,String middleName, String lastName,String suffixName, String email, String password) {
     String userId = UUID.randomUUID().toString();
-    String query = "INSERT INTO users (id, first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?, 'teacher')";
+    String query = "INSERT INTO users (id, first_name, middle_name, last_name, suffix_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?, 'student')";
 
     try (PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setString(1, userId);
       stmt.setString(2, firstName);
-      stmt.setString(3, lastName);
-      stmt.setString(4, email);
-      stmt.setString(5, password);
+      stmt.setString(3, middleName);
+      stmt.setString(4, lastName);
+      stmt.setString(5, suffixName);
+      stmt.setString(6, email);
+      stmt.setString(7, password);
       stmt.executeUpdate();
+
       return userId;
     } catch (SQLException e) {
       e.printStackTrace();
