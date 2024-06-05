@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 04, 2024 at 08:51 PM
+-- Generation Time: Jun 05, 2024 at 03:03 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -116,8 +116,18 @@ CREATE TABLE `book_borrows` (
 --
 
 INSERT INTO `book_borrows` (`id`, `borrowed_at`, `due_date`, `returned_at`, `book_id`, `user_id`) VALUES
-(12, '2024-06-04', '2024-06-07', NULL, 7, 'df228bed-21af-11ef-b516-00e18ce201d5'),
-(13, '2024-06-04', '2024-06-07', NULL, 36, 'df228bed-21af-11ef-b516-00e18ce201d5');
+(13, '2024-06-04', '2024-06-07', '2024-06-05', 36, 'df228bed-21af-11ef-b516-00e18ce201d5'),
+(15, '2024-05-27', '2024-05-30', '2024-06-05', 67, 'df228bed-21af-11ef-b516-00e18ce201d5'),
+(16, '2024-06-05', '2024-06-08', '2024-06-06', 36, '7f5fa34a-c8b2-4a17-8656-99afe45d204d'),
+(17, '2024-06-05', '2024-06-08', NULL, 38, '7f5fa34a-c8b2-4a17-8656-99afe45d204d'),
+(18, '2024-06-05', '2024-06-08', NULL, 66, '7f5fa34a-c8b2-4a17-8656-99afe45d204d'),
+(19, '2024-06-05', '2024-06-08', NULL, 65, '7f5fa34a-c8b2-4a17-8656-99afe45d204d'),
+(20, '2024-06-05', '2024-06-08', NULL, 64, '7f5fa34a-c8b2-4a17-8656-99afe45d204d'),
+(21, '2024-06-05', '2024-06-08', '2024-06-05', 36, 'df228bed-21af-11ef-b516-00e18ce201d5'),
+(22, '2024-06-05', '2024-06-08', NULL, 62, 'b10af538-22b2-11ef-899a-1413338a5c68'),
+(23, '2024-06-05', '2024-06-08', NULL, 63, 'b10af538-22b2-11ef-899a-1413338a5c68'),
+(24, '2024-06-05', '2024-06-08', '2024-06-05', 37, 'df228bed-21af-11ef-b516-00e18ce201d5'),
+(26, '2024-05-30', '2024-06-02', NULL, 7, 'df228bed-21af-11ef-b516-00e18ce201d5');
 
 -- --------------------------------------------------------
 
@@ -131,6 +141,13 @@ CREATE TABLE `book_penalties` (
   `book_borrow_id` int(11) NOT NULL,
   `penalty_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `book_penalties`
+--
+
+INSERT INTO `book_penalties` (`id`, `payment_amount`, `book_borrow_id`, `penalty_id`) VALUES
+(4, 120.00, 15, 1);
 
 -- --------------------------------------------------------
 
@@ -169,7 +186,8 @@ CREATE TABLE `penalties` (
 --
 
 INSERT INTO `penalties` (`id`, `amount`, `user_role`) VALUES
-(1, 20.00, 'student');
+(1, 20.00, 'student'),
+(2, 0.00, 'teacher');
 
 -- --------------------------------------------------------
 
@@ -221,6 +239,7 @@ CREATE TABLE `sections` (
 
 INSERT INTO `sections` (`id`, `name`, `level`) VALUES
 ('acsad', 'ACSAD', 'college'),
+('apdev', 'APDEV', 'college'),
 ('bcsad', 'BCSAD', 'college'),
 ('ccsad', 'CCSAD', 'college'),
 ('dcsad', 'DCSAD', 'college');
@@ -243,6 +262,7 @@ CREATE TABLE `section_levels` (
 
 INSERT INTO `section_levels` (`id`, `section_id`, `year_level_id`) VALUES
 ('c1-acsad', 'acsad', 'c1'),
+('c1-apdev', 'apdev', 'c1'),
 ('c1-bcsad', 'bcsad', 'c1'),
 ('c1-ccsad', 'ccsad', 'c1'),
 ('c1-dcsad', 'dcsad', 'c1');
@@ -264,7 +284,21 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id`, `section_level_id`, `user_id`) VALUES
-('a11111111', 'c1-bcsad', '79c9c30a-fc01-4f71-9f8d-5cecda72cc4d');
+('a11111111', 'c1-bcsad', '79c9c30a-fc01-4f71-9f8d-5cecda72cc4d'),
+('A12344924', 'c1-apdev', '4be89f3f-22b1-11ef-899a-1413338a5c68'),
+('A12345574', 'c1-bcsad', '4be87058-22b1-11ef-899a-1413338a5c68'),
+('A12345595', 'c1-bcsad', 'cf0ef484-22af-11ef-899a-1413338a5c68'),
+('A12345600', 'c1-bcsad', 'c07ac68f-21ad-11ef-b516-00e18ce201d5'),
+('a12345601', 'c1-bcsad', 'df228bed-21af-11ef-b516-00e18ce201d5'),
+('A12345613', 'c1-acsad', '4be894b0-22b1-11ef-899a-1413338a5c68'),
+('A12345642', 'c1-bcsad', '4be87a0b-22b1-11ef-899a-1413338a5c68'),
+('A12345643', 'c1-acsad', '98d5639a-22b0-11ef-899a-1413338a5c68'),
+('A12345678', 'c1-bcsad', '3842aaa4-22b0-11ef-899a-1413338a5c68'),
+('A12345750', 'c1-acsad', '4be8a483-22b1-11ef-899a-1413338a5c68'),
+('A12345923', 'c1-acsad', '4be899f4-22b1-11ef-899a-1413338a5c68'),
+('A62345602', 'c1-acsad', '4be88f48-22b1-11ef-899a-1413338a5c68'),
+('K12151881', 'c1-bcsad', '4be88152-22b1-11ef-899a-1413338a5c68'),
+('K12153553', 'c1-bcsad', '4be888c9-22b1-11ef-899a-1413338a5c68');
 
 -- --------------------------------------------------------
 
@@ -283,7 +317,10 @@ CREATE TABLE `teachers` (
 --
 
 INSERT INTO `teachers` (`id`, `department_id`, `user_id`) VALUES
-('t12345', 'ccis', '7f5fa34a-c8b2-4a17-8656-99afe45d204d');
+('T111111111', 'ccis', 'b10af003-22b2-11ef-899a-1413338a5c68'),
+('t12345', 'ccis', '7f5fa34a-c8b2-4a17-8656-99afe45d204d'),
+('T22222222', 'ccis', 'b10ae8cd-22b2-11ef-899a-1413338a5c68'),
+('T33333333', 'ccis', 'b10af538-22b2-11ef-899a-1413338a5c68');
 
 -- --------------------------------------------------------
 
@@ -308,12 +345,25 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `role`, `password`, `avatar_url`, `email`) VALUES
-('02b07017-21a7-11ef-b516-00e18ce201d5', 'Aaron', NULL, 'Melendres', NULL, 'student', 'password', NULL, 'aaron@gmail.com'),
-('1d363d3d-21a9-11ef-b516-00e18ce201d5', 'Lorena', NULL, 'Sanchez', NULL, 'student', 'password', NULL, 'lorena@gmail.com'),
 ('372ae01a-21a1-11ef-b516-00e18ce201d5', 'Admin', NULL, 'User', NULL, 'admin', 'password', NULL, 'admin@gmail.com'),
+('3842aaa4-22b0-11ef-899a-1413338a5c68', 'Lorena', NULL, 'Sanchez', NULL, 'student', 'password', NULL, 'lorena@gmail.com'),
+('4be87058-22b1-11ef-899a-1413338a5c68', 'Rhenz', NULL, 'Ganotice', NULL, 'student', 'password', NULL, 'rhenz@gmail.com'),
+('4be87a0b-22b1-11ef-899a-1413338a5c68', 'Shammy', NULL, 'Suyat', NULL, 'student', 'password', NULL, 'shammy@gmail.com'),
+('4be88152-22b1-11ef-899a-1413338a5c68', 'Dan Ike', NULL, 'Estoque', NULL, 'student', 'password', NULL, 'dan@gmail.com'),
+('4be888c9-22b1-11ef-899a-1413338a5c68', 'Craig', NULL, 'Naguit', NULL, 'student', 'password', NULL, 'craig@gmail.com'),
+('4be88f48-22b1-11ef-899a-1413338a5c68', 'Julian Carlo', NULL, 'Ausa', NULL, 'student', 'password', NULL, 'julian@gmail.com'),
+('4be894b0-22b1-11ef-899a-1413338a5c68', 'Charles', NULL, 'Lao', NULL, 'student', 'password', NULL, 'charles@gmail.com'),
+('4be899f4-22b1-11ef-899a-1413338a5c68', 'Althea', NULL, 'Magpantay', NULL, 'student', 'password', NULL, 'althea@gmail.com'),
+('4be89f3f-22b1-11ef-899a-1413338a5c68', 'Ashley', NULL, 'Gonzales', NULL, 'student', 'password', NULL, 'ashley@gmail.com'),
+('4be8a483-22b1-11ef-899a-1413338a5c68', 'Rhussel', NULL, 'Combo', NULL, 'student', 'password', NULL, 'rhussel@gmail.com'),
 ('79c9c30a-fc01-4f71-9f8d-5cecda72cc4d', 'Eric', NULL, 'Lor', NULL, 'teacher', 'password', NULL, 'elor@gmail.com'),
 ('7f5fa34a-c8b2-4a17-8656-99afe45d204d', 'Hitori', NULL, 'Bocchi', NULL, 'teacher', 'password', NULL, 'bocchi@gmail.com'),
+('98d5639a-22b0-11ef-899a-1413338a5c68', 'Emmarlon', NULL, 'Ogoc', NULL, 'student', 'password', NULL, 'emmarlon@gmail.com'),
+('b10ae8cd-22b2-11ef-899a-1413338a5c68', 'Alexander', NULL, 'Pahayahay', NULL, 'teacher', 'password', NULL, 'alexander@gmail.com'),
+('b10af003-22b2-11ef-899a-1413338a5c68', 'Jomariss', NULL, 'Plan', NULL, 'teacher', 'password', NULL, 'jomariss@gmail.com'),
+('b10af538-22b2-11ef-899a-1413338a5c68', 'Rommel', NULL, 'Dorin', NULL, 'teacher', 'password', NULL, 'rommel@gmail.com'),
 ('c07ac68f-21ad-11ef-b516-00e18ce201d5', 'Samantha', NULL, 'Oris', NULL, 'student', 'password', NULL, 'samantha@gmail.com'),
+('cf0ef484-22af-11ef-899a-1413338a5c68', 'Aaron Kenneth', NULL, 'Melendres', NULL, 'student', 'password', NULL, 'aaron@gmail.com'),
 ('df228bed-21af-11ef-b516-00e18ce201d5', 'Giordan', NULL, 'Nuez', NULL, 'student', 'password', NULL, 'gior@gmail.com');
 
 -- --------------------------------------------------------
@@ -458,19 +508,19 @@ ALTER TABLE `books`
 -- AUTO_INCREMENT for table `book_borrows`
 --
 ALTER TABLE `book_borrows`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `book_penalties`
 --
 ALTER TABLE `book_penalties`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `penalties`
 --
 ALTER TABLE `penalties`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `publishers`
